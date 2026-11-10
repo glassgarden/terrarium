@@ -19,7 +19,7 @@ juce/        the plugin (PluginProcessor, PluginEditor), the resources each bund
 
 The script isn't copied or ported: each bundle carries `terrarium.lua` and `lib/` as they are,
 norns-web's `norns.lua` as the norns API, Lua 5.3 (what norns runs), and the native mi-UGens from
-[norns-mi-UGens](https://github.com/carlosedp/norns-mi-UGens/blob/main/native/README.md)' release.
+[norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens/blob/main/native/README.md)' release.
 
 ## Build
 

@@ -54,7 +54,7 @@ and Elements breathes under the ground. Émilie Gillet's instruments, alive insi
 To install terrarium, type this in the maiden REPL:
 
 ```
-;install https://github.com/carlosedp/terrarium
+;install https://github.com/glassgarden/terrarium
 ```
 
 ### The first time you open it

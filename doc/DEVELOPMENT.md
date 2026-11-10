@@ -67,7 +67,7 @@ node tools/norns-web/serve.mjs     # then open http://localhost:8800/
 
 It runs this Lua as is (screen, controls, clocks, PARAMS). The engine is `lib/Engine_Terrarium.js`:
 each SynthDef rebuilt in Web Audio around the same mi-UGens, compiled to WebAssembly by
-[norns-mi-UGens](https://github.com/carlosedp/norns-mi-UGens) (`./build.sh --wasm`) and kept in
+[norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`./build.sh --wasm`) and kept in
 `lib/Engine_Terrarium/` (`make mi-wasm` rebuilds them). Every push to main publishes it to
 <https://terrarium.glassgarden.cc/> (`.github/workflows/pages.yml`).
 

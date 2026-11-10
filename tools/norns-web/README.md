@@ -7,7 +7,7 @@ to WebAssembly.
 
 It knows nothing about any one script. Any script that sticks to `screen`, `params`, `clock`,
 `metro` and engine commands should run; midi, grid, arc, softcut, crow and poll are silent stubs.
-It started inside [terrarium](https://github.com/carlosedp/terrarium), which is still the most
+It started inside [terrarium](https://github.com/glassgarden/terrarium), which is still the most
 complete example (an engine stand-in on real mi-UGens, a plugin that uses this page as its face).
 
 ## Add it to a script

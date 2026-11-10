@@ -83,50 +83,50 @@
       {
         "title": "Windows",
         "text": "VST3 plugin and standalone app, for Windows 10 and 11 (64-bit). Ableton Live, Reason, Bitwig, Reaper, Cubase.",
-        "url": "https://github.com/carlosedp/terrarium/releases/latest/download/terrarium-plugin-windows.zip",
+        "url": "https://github.com/glassgarden/terrarium/releases/latest/download/terrarium-plugin-windows.zip",
         "label": "Download for Windows"
       },
       {
         "title": "macOS",
         "text": "AU and VST3 plugins and a standalone app, for Intel and Apple Silicon. Logic Pro, Ableton Live, Reason, Bitwig.",
-        "url": "https://github.com/carlosedp/terrarium/releases/latest/download/terrarium-plugin-macos.zip",
+        "url": "https://github.com/glassgarden/terrarium/releases/latest/download/terrarium-plugin-macos.zip",
         "label": "Download for macOS"
       },
       {
         "title": "Linux",
         "text": "VST3 plugin and standalone app (x86_64). Bitwig, Reaper, Ardour.",
-        "url": "https://github.com/carlosedp/terrarium/releases/latest/download/terrarium-plugin-linux.zip",
+        "url": "https://github.com/glassgarden/terrarium/releases/latest/download/terrarium-plugin-linux.zip",
         "label": "Download for Linux"
       }
     ],
     "links": [
       {
         "label": "the plugin's manual",
-        "url": "https://github.com/carlosedp/terrarium/blob/main/doc/PLUGIN-MANUAL.md"
+        "url": "https://github.com/glassgarden/terrarium/blob/main/doc/PLUGIN-MANUAL.md"
       },
       {
         "label": "the plugin's manual (PDF)",
-        "url": "https://github.com/carlosedp/terrarium/releases/latest/download/terrarium-plugin-manual.pdf"
+        "url": "https://github.com/glassgarden/terrarium/releases/latest/download/terrarium-plugin-manual.pdf"
       },
       {
         "label": "all releases",
-        "url": "https://github.com/carlosedp/terrarium/releases"
+        "url": "https://github.com/glassgarden/terrarium/releases"
       }
     ]
   },
-  "install": ";install https://github.com/carlosedp/terrarium",
+  "install": ";install https://github.com/glassgarden/terrarium",
   "links": [
     {
       "label": "terrarium on GitHub",
-      "url": "https://github.com/carlosedp/terrarium"
+      "url": "https://github.com/glassgarden/terrarium"
     },
     {
       "label": "the manual",
-      "url": "https://github.com/carlosedp/terrarium/blob/main/doc/MANUAL.md"
+      "url": "https://github.com/glassgarden/terrarium/blob/main/doc/MANUAL.md"
     },
     {
       "label": "the manual (PDF)",
-      "url": "https://github.com/carlosedp/terrarium/blob/main/doc/terrarium-manual.pdf"
+      "url": "https://github.com/glassgarden/terrarium/blob/main/doc/terrarium-manual.pdf"
     },
     {
       "label": "terrarium on splines catalog",

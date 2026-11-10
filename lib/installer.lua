@@ -9,7 +9,7 @@
 -- Both run the install.sh that ships inside the tarball, which also moves
 -- older mi-UGens installs aside so SuperCollider doesn't find duplicate classes.
 
-local REPO = "carlosedp/norns-mi-UGens"
+local REPO = "glassgarden/norns-mi-UGens"
 local URL = "https://github.com/" .. REPO .. "/releases/latest/download/mi-UGens-norns.tar.gz"
 local EXT = "/home/we/.local/share/SuperCollider/Extensions"
 local LOCAL_GLOB = _path.dust .. "mi-UGens-norns*.tar.gz"

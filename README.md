@@ -1,14 +1,14 @@
-# <img src="https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/img/icon.png" alt="" width="40" height="40" align="top"> terrarium
+# <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/img/icon.png" alt="" width="40" height="40" align="top"> terrarium
 
-![terrarium on a norns shield, standing on the ground under a night sky: rain falls on a meadow and a pond on its screen](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/cover.png)
+![terrarium on a norns shield, standing on the ground under a night sky: rain falls on a meadow and a pond on its screen](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/cover.png)
 
 🌱 A small world of modular instruments for [monome norns](https://monome.org/docs/norns/).
 
-**[Read the manual](https://github.com/carlosedp/terrarium/blob/main/doc/MANUAL.md)** for how to play it (also as a [PDF](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/terrarium-manual.pdf)),
+**[Read the manual](https://github.com/glassgarden/terrarium/blob/main/doc/MANUAL.md)** for how to play it (also as a [PDF](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/terrarium-manual.pdf)),
 or **[try it in your browser](https://terrarium.glassgarden.cc/)**, phones included: the real
 script, playing the real Mutable Instruments code. It also comes as a **VST3 / AU plugin** for your
-DAW, on its tempo and automation: see [the plugin's manual](https://github.com/carlosedp/terrarium/blob/main/doc/PLUGIN-MANUAL.md) (and
-[plugin/](https://github.com/carlosedp/terrarium/blob/main/plugin/README.md) for building it).
+DAW, on its tempo and automation: see [the plugin's manual](https://github.com/glassgarden/terrarium/blob/main/doc/PLUGIN-MANUAL.md) (and
+[plugin/](https://github.com/glassgarden/terrarium/blob/main/plugin/README.md) for building it).
 
 The patch is a landscape. Five parts each draw one piece of the scene and play one part of
 the sound. Swap a module and that piece of the scene changes; turn a macro and the scene moves
@@ -34,7 +34,7 @@ at dawn and dusk when the day is on, a note at a time.
 ## Requirements
 
 - norns (or norns shield / fates)
-- [mi-UGens](https://github.com/carlosedp/norns-mi-UGens) built for norns. If they're missing,
+- [mi-UGens](https://github.com/glassgarden/norns-mi-UGens) built for norns. If they're missing,
   terrarium shows an installer instead of the scene: **K3** downloads and installs the latest
   build, **K2** installs a `mi-UGens-norns*.tar.gz` you copied into `dust/`. Restart norns after.
   Fireflies needs a build that includes MiBeads; without it, that module is hidden.
@@ -44,7 +44,7 @@ at dawn and dusk when the day is on, a note at a time.
 From the maiden REPL:
 
 ```
-;install https://github.com/carlosedp/terrarium
+;install https://github.com/glassgarden/terrarium
 ```
 
 ## Controls
@@ -92,7 +92,7 @@ mode) are also in PARAMS, so they save with PSETs and can be MIDI-mapped.
 ## Development
 
 How it's built, testing without a norns, running it in a browser, tuning and what's left to do on
-hardware: see [doc/DEVELOPMENT.md](https://github.com/carlosedp/terrarium/blob/main/doc/DEVELOPMENT.md).
+hardware: see [doc/DEVELOPMENT.md](https://github.com/glassgarden/terrarium/blob/main/doc/DEVELOPMENT.md).
 
 ## Wallpapers
 
@@ -101,15 +101,15 @@ aluminium case or the black one.
 
 | Scene                                                                                                                                                                                                                               | Desktop                                                                                                                                                                                                                                   | Phone                                                                                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg" alt="Rain on a meadow and a pond, clouds, an aurora" width="320"><br>Rain on a meadow and a pond, clouds, an aurora | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/meadow-desktop-black.jpg)       | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/meadow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/meadow-phone-black.jpg)       |
-| <img src="https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg" alt="Snow settling on crystals, mountains behind" width="320"><br>Snow settling on crystals, mountains behind         | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/snow-desktop-black.jpg)           | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/snow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/snow-phone-black.jpg)           |
-| <img src="https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg" alt="Reeds over a pond, fireflies in the dark" width="320"><br>Reeds over a pond, fireflies in the dark          | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/fireflies-desktop-black.jpg) | [aluminium](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/fireflies-phone-alu.jpg) · [black](https://raw.githubusercontent.com/carlosedp/terrarium/main/doc/art/wallpapers/fireflies-phone-black.jpg) |
+| <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg" alt="Rain on a meadow and a pond, clouds, an aurora" width="320"><br>Rain on a meadow and a pond, clouds, an aurora | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-black.jpg)       | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-phone-black.jpg)       |
+| <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg" alt="Snow settling on crystals, mountains behind" width="320"><br>Snow settling on crystals, mountains behind         | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-black.jpg)           | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-phone-black.jpg)           |
+| <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg" alt="Reeds over a pond, fireflies in the dark" width="320"><br>Reeds over a pond, fireflies in the dark          | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-black.jpg) | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-phone-black.jpg) |
 
 ## License and copyright
 
 terrarium is made by [glassgarden](https://glassgarden.cc). © 2026 glassgarden.
 
-- **The code** is free software under the GNU GPL v3.0 (see [LICENSE](https://github.com/carlosedp/terrarium/blob/main/LICENSE)): you can use,
+- **The code** is free software under the GNU GPL v3.0 (see [LICENSE](https://github.com/glassgarden/terrarium/blob/main/LICENSE)): you can use,
   study, share and change it under its terms.
 - **The terrarium name, the manual and its images** are © 2026 glassgarden, all rights
   reserved.
@@ -117,10 +117,10 @@ terrarium is made by [glassgarden](https://glassgarden.cc). © 2026 glassgarden.
   [Mutable Instruments code](https://github.com/pichenettes/eurorack), via Volker Böhm's
   [mi-UGens](https://github.com/v7b1/mi-UGens) (GPL-3.0), installed separately on the norns. The
   browser version carries WebAssembly builds of seven of them in `lib/Engine_Terrarium/`, built
-  from [norns-mi-UGens](https://github.com/carlosedp/norns-mi-UGens) (`BUILDINFO` there records
+  from [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`BUILDINFO` there records
   the source).
   [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`. The plugin's
-  downloads carry [THIRD-PARTY-NOTICES.txt](https://github.com/carlosedp/terrarium/blob/main/THIRD-PARTY-NOTICES.txt), with the licences of all it
+  downloads carry [THIRD-PARTY-NOTICES.txt](https://github.com/glassgarden/terrarium/blob/main/THIRD-PARTY-NOTICES.txt), with the licences of all it
   includes.
 - Mutable Instruments, monome, norns and all other product names are trademarks of their
   respective owners, used only to identify what terrarium works with. No affiliation with or

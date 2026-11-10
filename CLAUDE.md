@@ -94,7 +94,7 @@ footer) comes from
 
 ## Related repo
 
-`~/projects/norns-mi-UGens` (github.com/carlosedp/norns-mi-UGens, published; v1.0.0 on 2026-10-19) builds
+`~/projects/norns-mi-UGens` (github.com/glassgarden/norns-mi-UGens, published; v1.0.0 on 2026-10-19) builds
 mi-UGens for norns: `./build.sh --pr 24` cross-compiles in a Debian Buster armhf container
 (upstream v7b1/mi-UGens + PR 24 = MiBeads), `./deploy.sh` installs over ssh. Its GitHub release
 asset `mi-UGens-norns.tar.gz` (fixed name, latest release) is what `lib/installer.lua` downloads;
