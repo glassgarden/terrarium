@@ -236,12 +236,14 @@
   view.shell = query.get("shell") || view.shell || "shield";
   view.finish = query.get("finish") || view.finish || "alu";
   view.screen = query.get("screen") || view.screen || "yellow"; // the amber of a shield's OLED, by default
+  view.sky = query.get("sky") || view.sky || "moving"; // or "still": the sky drawn once (as with reduced motion)
   function applyView() {
     $("#device").dataset.shell = view.shell;
     $("#device").dataset.finish = view.finish;
     $("#v-shell").value = view.shell;
     $("#v-finish").value = view.finish;
     $("#v-screen").value = view.screen;
+    $("#v-sky").value = view.sky;
     setTint(view.screen);
     try {
       prefs.set("norns-web:view", JSON.stringify(view));
@@ -258,6 +260,12 @@
   $("#v-screen").addEventListener("change", (e) => {
     view.screen = e.target.value;
     applyView();
+  });
+  $("#v-sky").addEventListener("change", (e) => {
+    view.sky = e.target.value;
+    applyView();
+    pageSky.layout(); // both skies again, still or moving (a still one is drawn once, here)
+    fullSky.layout();
   });
   applyView();
   // a hosting plugin's options, as checkboxes in Look
@@ -289,6 +297,8 @@
   const scene = () => (window.NornsWeb && window.NornsWeb.sky) || null;
   const PX = 4; // one sky pixel, in CSS pixels
   const still = matchMedia("(prefers-reduced-motion: reduce)");
+  // a still sky: the system asks for less motion, or Look > the sky says so
+  const calm = () => still.matches || view.sky === "still";
   // seeded (Park-Miller), so the sky is the same on every visit
   const rand = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   function makeSky(box, sky) {
@@ -306,7 +316,7 @@
       }
       sg.clearRect(0, 0, cols, rows);
       for (const s of stars) {
-        const a = s.tw && !still.matches ? s.l * (0.55 + 0.45 * Math.sin((t / 1000) * s.tw + s.ph)) : s.l;
+        const a = s.tw && !calm() ? s.l * (0.55 + 0.45 * Math.sin((t / 1000) * s.tw + s.ph)) : s.l;
         sg.fillStyle = `rgba(201, 208, 202, ${a.toFixed(2)})`;
         sg.fillRect(s.x, s.y, 1, 1);
       }
@@ -334,7 +344,7 @@
       sky.width = cols;
       sky.height = rows;
       ground = Math.round((d.bottom - r.top) / PX); // the device stands on it
-      Object.assign(view, { cols, rows, ground, still: still.matches, device: { // where the device stands, in sky pixels
+      Object.assign(view, { cols, rows, ground, still: calm(), device: { // where the device stands, in sky pixels
         left: Math.floor((d.left - r.left) / PX), right: Math.ceil((d.right - r.left) / PX),
         top: Math.floor((d.top - r.top) / PX), bottom: ground } });
       const sc = scene();
@@ -367,7 +377,7 @@
         pageSky.layout();
         fullSky.layout();
       }
-      if (t - last > 1000 / ((sc && sc.fps) || 8) - 4 && !still.matches) {
+      if (t - last > 1000 / ((sc && sc.fps) || 8) - 4 && !calm()) {
         (document.body.classList.contains("full") ? fullSky : pageSky).draw(t);
         last = t;
       }
