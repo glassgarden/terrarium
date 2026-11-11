@@ -297,7 +297,7 @@
   const scene = () => (window.NornsWeb && window.NornsWeb.sky) || null;
   const PX = 4; // one sky pixel, in CSS pixels
   const still = matchMedia("(prefers-reduced-motion: reduce)");
-  // a still sky: the system asks for less motion, or Look > the sky says so
+  // a still sky: the system asks for less motion, or Look > the background says so
   const calm = () => still.matches || view.sky === "still";
   // seeded (Park-Miller), so the sky is the same on every visit
   const rand = (seed) => () => (seed = (seed * 16807) % 2147483647) / 2147483647;

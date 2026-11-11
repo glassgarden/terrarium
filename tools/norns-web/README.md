@@ -78,7 +78,7 @@ loads the same pinned version from jsdelivr.
 
 The page puts the device up front, standing on the ground under a night sky, with Start sound, the
 script's actions, How to play (also <kbd>?</kbd>), Full screen and a Look menu (shell, case, screen
-color, and whether the sky moves or stays still, as it does anyway when the system asks for
+color, and whether the background behind the device is animated or still, as it is anyway when the system asks for
 reduced motion); full screen shows just the device, under its own night sky (its buttons stack down the
 right side on a phone turned sideways, and a phone held upright is asked to turn). PARAMS, PSETs, the log and the
 REPL are in "Under the hood", a drawer at the bottom of the window: opening it scrolls the device into

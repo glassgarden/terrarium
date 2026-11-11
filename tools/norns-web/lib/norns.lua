@@ -536,6 +536,17 @@ norns = {
   end,
   enc = { sens = function() end, accel = function() end },
   none = function() end,
+  -- the system menu: never open here (a quick K1 tap isn't a menu in the browser); enough for
+  -- libraries that take the screen over and give it back (norns-deps' installer)
+  menu = {
+    status = function() return false end, init = function() end, set = function() end,
+    get_enc = function() end, get_key = function() end,
+    get_redraw = function() end, get_refresh = function() end,
+  },
+  -- the running script: its redraw, as norns keeps it; load() can't swap scripts here
+  script = {
+    load = function(path) print("norns-web: norns.script.load(" .. tostring(path) .. ") is not supported; reload the page") end,
+  },
 }
 function include(file)
   for _, base in ipairs({ norns.state.path, _path.code }) do
