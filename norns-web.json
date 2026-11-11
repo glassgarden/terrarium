@@ -137,5 +137,30 @@
       "url": "https://glassgarden.cc"
     }
   ],
-  "footer": "© 2026 glassgarden, a project by Carlos Eduardo. terrarium's code is free software under the GNU GPL v3.0; the terrarium name, its manual and images are all rights reserved. Mutable Instruments, monome and norns are trademarks of their respective owners, named only to say what terrarium works with; no affiliation or endorsement is implied. In the browser it runs on norns-web, with wasmoon (MIT)."
+  "footer": "© 2026 glassgarden, a project by Carlos Eduardo. terrarium's code is free software under the GNU GPL v3.0; the terrarium name, its manual and images are all rights reserved. Mutable Instruments, monome and norns are trademarks of their respective owners, named only to say what terrarium works with; no affiliation or endorsement is implied. In the browser it runs on norns-web, with wasmoon (MIT).",
+  "theme": {
+    "colors": {
+      "paper": "#e7eee9",
+      "surface": "#f3f7f4",
+      "ink": "#17201c",
+      "muted": "#4f6159",
+      "rule": "#c8d6ce",
+      "accent": "#2a6e55",
+      "accent-soft": "#d3e8dc",
+      "night": "#0b1512",
+      "night-2": "#101d19",
+      "night-ink": "#e2ece6",
+      "night-muted": "#9fb6aa",
+      "night-rule": "#22352e"
+    },
+    "dark": {
+      "paper": "#0d1613",
+      "surface": "#13201b",
+      "ink": "#e0eae4",
+      "muted": "#98ada2",
+      "rule": "#22332c",
+      "accent": "#86d4ab",
+      "accent-soft": "#1c3a2d"
+    }
+  }
 }

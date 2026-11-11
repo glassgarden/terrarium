@@ -55,6 +55,9 @@ footer) comes from
   macros a module doesn't have.
 - A module with a variant (an option param picked with hold K2 + E2) sets `variant` to that param's id.
 - A module that adds its own params must set `extra_count` (params group sizes are declared up front).
+- **The web page's scene lists each part's modules in `LAYERS` order** (`KINDS` in
+  `lib/Engine_Terrarium/sky.js`, read from the `<part>_kind` params): a module added to `LAYERS` (at the end of
+  its list) gets its picture there too, or the page shows another module's.
 - A new color, air or drone module needs a matching `terrarium_<id>` SynthDef in the engine. A voice
   module sets `voice` to the engine voice it plays (`plaits`, `rings`, `input`:
   `terrarium_voice_<kind>`; `none` for silence).
@@ -69,7 +72,8 @@ footer) comes from
   `plugin/core/Engine.cpp` (the plugin's engine), or the plugin says "unknown engine command".
 - **A SynthDef change goes in `Engine_Terrarium.js` too** (its `DEFS`, one function per SynthDef):
   it plays the same mi-UGens, built as WebAssembly in `lib/Engine_Terrarium/` (don't edit those;
-  `make mi-wasm` rebuilds them from `~/projects/norns-mi-UGens`, `./build.sh --wasm`). Scalar vs
+  `make mi-wasm` rebuilds them from `~/projects/norns-mi-UGens`, `./build.sh --wasm`; `sky.js`
+  there is ours: the page's scene, the jar's parts behind the device, fed by `note()`). Scalar vs
   control rate matters as in the SynthDef: a literal is a scalar, a SynthDef argument a control.
   The one exception is `terrarium_voice_input` (visitors): the browser has no MIDI out or input
   for it, so visitors are silent there.

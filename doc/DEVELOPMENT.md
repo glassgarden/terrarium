@@ -17,7 +17,7 @@ lib/scene/*.lua          one file per module: its drawing, macros and sound mapp
 lib/installer.lua        mi-UGens check and installer
 doc/SOUND.md             macro -> mi-UGen parameter map (the tuning reference)
 lib/Engine_Terrarium.js  the engine for norns-web: the same graphs, in Web Audio (norns ignores it)
-lib/Engine_Terrarium/    the mi-UGens it plays, built as WebAssembly (`make mi-wasm`)
+lib/Engine_Terrarium/    the mi-UGens it plays, built as WebAssembly (`make mi-wasm`); and sky.js, the page's scene
 plugin/                  the VST3 / AU plugin (see plugin/README.md)
 tools/norns-web/         runs the script's real Lua in a browser
 test/                    mocked norns runtime, a smoke test and a soak test
@@ -70,6 +70,16 @@ each SynthDef rebuilt in Web Audio around the same mi-UGens, compiled to WebAsse
 [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`./build.sh --wasm`) and kept in
 `lib/Engine_Terrarium/` (`make mi-wasm` rebuilds them). Every push to main publishes it to
 <https://terrarium.glassgarden.cc/> (`.github/workflows/pages.yml`).
+
+Behind the device, the page shows the jar itself (`lib/Engine_Terrarium/sky.js`, norns-web's
+`NornsWeb.sky`): what lives in each part, read from its param (rain, snow or a storm; a meadow,
+crystals, reeds or visitors; a pond or fog; clouds, fireflies or mountains; an aurora or roots),
+the day from the day setting (off: the garden at night), and every note landing where the jar
+says it did (`Engine_Terrarium.js`'s `note()` passes its pan on), beside the device: a splash, a
+bolt, rings on the pond, the plants near it lit. The page's colors are `theme` in
+`norns-web.json`. A new part on the screen wants its picture in `sky.js` too (its `KINDS` follow
+the order of `LAYERS` in `terrarium.lua`). The plugin's face loads no engine stand-in, so it keeps
+norns-web's night sky (with the theme's colors).
 
 ## Tuning
 
