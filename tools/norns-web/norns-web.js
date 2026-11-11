@@ -281,6 +281,12 @@
   // ---------- the night sky behind the device: chunky pixel stars and the ground it stands on ----------
   // Two of them: the page's, behind the device and the buttons, and full screen's, filling the
   // frame. relayoutSky() puts the ground back under the device after it moves or scales.
+  // A script can paint its own scene instead (NornsWeb.sky, from its stand-in's file): layout(view)
+  // when the canvas changes size, draw(g, t, view) on every frame (fps of them a second, default
+  // 8); view holds cols, rows, ground (the row the device stands on), device ({ left, right, top,
+  // bottom }, in the same pixels) and still (reduced motion), one per canvas, and the scene may
+  // keep its own things on it.
+  const scene = () => (window.NornsWeb && window.NornsWeb.sky) || null;
   const PX = 4; // one sky pixel, in CSS pixels
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   // seeded (Park-Miller), so the sky is the same on every visit
@@ -291,7 +297,13 @@
       ground = 0,
       cols = 0,
       rows = 0;
+    const view = {};
     const draw = (t) => {
+      const sc = scene();
+      if (sc && sc.draw) {
+        try { sc.draw(sg, t, view); } catch (e) { console.error("norns-web sky:", e); }
+        return;
+      }
       sg.clearRect(0, 0, cols, rows);
       for (const s of stars) {
         const a = s.tw && !still.matches ? s.l * (0.55 + 0.45 * Math.sin((t / 1000) * s.tw + s.ph)) : s.l;
@@ -322,6 +334,11 @@
       sky.width = cols;
       sky.height = rows;
       ground = Math.round((d.bottom - r.top) / PX); // the device stands on it
+      Object.assign(view, { cols, rows, ground, still: still.matches, device: { // where the device stands, in sky pixels
+        left: Math.floor((d.left - r.left) / PX), right: Math.ceil((d.right - r.left) / PX),
+        top: Math.floor((d.top - r.top) / PX), bottom: ground } });
+      const sc = scene();
+      if (sc && sc.layout) try { sc.layout(view); } catch (e) { console.error("norns-web sky:", e); }
       const rnd = rand(7);
       stars = [];
       for (let i = 0; i < (cols * ground) / 260; i++)
@@ -341,9 +358,16 @@
     fullSky = makeSky($("#frame"), $("#full-sky"));
   const relayoutSky = () => (document.body.classList.contains("full") ? fullSky : pageSky).layout();
   {
-    let last = 0;
+    let last = 0,
+      laidOut = null;
     const loop = (t) => {
-      if (t - last > 120 && !still.matches) {
+      const sc = scene();
+      if (sc !== laidOut) { // a scene arrived (or left): both skies take it up
+        laidOut = sc;
+        pageSky.layout();
+        fullSky.layout();
+      }
+      if (t - last > 1000 / ((sc && sc.fps) || 8) - 4 && !still.matches) {
         (document.body.classList.contains("full") ? fullSky : pageSky).draw(t);
         last = t;
       }
@@ -382,6 +406,89 @@
       unknown.add(cmd);
       if (engine) log(`engine stand-in has no command '${cmd}'`, "error");
     }
+  }
+
+  // ---------- norns.system_cmd ----------
+  // A command goes to the stand-in's system_cmd(cmd) first (a string, or a promise of one, is
+  // its output; undefined passes it on), then to a built-in curl on fetch, else it's logged as
+  // not run. The output goes back to Lua's callback. On the dev server, fetches and the stand-in's
+  // streams can go through its /proxy (NornsWeb.proxy(url)), so CORS doesn't stop them.
+  let fs = null;            // the Lua VM's file system, once it's up (for curl -o, util.make_dir)
+  window.NornsWeb.dev = false;
+  // for stand-ins and scenes: a param's value (a number, or undefined), and a file the script
+  // wrote (a string, or null), read from the Lua VM
+  let paramGet = null;
+  window.NornsWeb.param = (id) => {
+    if (!paramGet) return undefined;
+    try { const v = paramGet(String(id)); return typeof v === "number" && Number.isFinite(v) ? v : undefined; }
+    catch (e) { return undefined; }
+  };
+  window.NornsWeb.readFile = (path) => {
+    if (!fs) return null;
+    try { return fs.readFile(String(path), { encoding: "utf8" }); } catch (e) { return null; }
+  };
+  window.NornsWeb.proxy = (url) => (window.NornsWeb.dev && /^https?:/.test(url) ? `/proxy?url=${encodeURIComponent(url)}` : url);
+  function mkdirs(path) {
+    let at = "";
+    for (const part of String(path).split("/").filter(Boolean)) {
+      at += "/" + part;
+      try { fs.mkdir(at); } catch (e) { /* already there */ }
+    }
+  }
+  // the words of a shell command, quotes respected (enough for curl lines, not a shell)
+  function words(cmd) {
+    const out = []; let cur = null, q = null;
+    for (let i = 0; i < cmd.length; i++) {
+      const c = cmd[i];
+      if (q) { if (c === q) q = null; else if (c === "\\" && q === '"' && i + 1 < cmd.length) cur += cmd[++i]; else cur += c; continue; }
+      if (c === "'" || c === '"') { q = c; cur = cur ?? ""; continue; }
+      if (/\s/.test(c)) { if (cur !== null) out.push(cur), (cur = null); continue; }
+      if (c === "|" || c === ";" || c === "&" || c === ">" || c === "<") return null; // a pipeline or more: not ours
+      cur = (cur ?? "") + c;
+    }
+    if (cur !== null) out.push(cur);
+    return out;
+  }
+  // curl [-s -S -L -f -I] [-m|--max-time s] [-A ua] [-H h] [-o file] [-w '%{url_effective}'] url
+  async function curl(argv) {
+    let url = null, out = null, max = 0, head = false, fail = false, write = null; const headers = {};
+    for (let i = 1; i < argv.length; i++) {
+      const a = argv[i];
+      if (a === "-m" || a === "--max-time") max = +argv[++i];
+      else if (a === "-o" || a === "--output") out = argv[++i];
+      else if (a === "-A" || a === "--user-agent") headers["user-agent"] = argv[++i];
+      else if (a === "-H" || a === "--header") { const [k, ...v] = argv[++i].split(":"); headers[k.trim().toLowerCase()] = v.join(":").trim(); }
+      else if (a === "-w" || a === "--write-out") write = argv[++i];
+      else if (a === "-I" || a === "--head") head = true;
+      else if (a === "-f" || a === "--fail") fail = true;
+      else if (/^-[sSLfI]+$/.test(a)) { if (a.includes("I")) head = true; if (a.includes("f")) fail = true; }
+      else if (a === "--compressed" || a === "--location" || a === "--silent" || a === "--show-error") { /* fetch does these */ }
+      else if (!a.startsWith("-")) url = a;
+    }
+    if (!url) return "";
+    const ctl = new AbortController(), timer = max > 0 ? setTimeout(() => ctl.abort(), max * 1000) : null;
+    try {
+      const res = await fetch(window.NornsWeb.proxy(url), { method: head ? "HEAD" : "GET", headers, signal: ctl.signal });
+      const final = res.headers.get("x-norns-web-url") || (window.NornsWeb.dev ? url : res.url) || url;
+      if (fail && !res.ok) return write ? write.replace("%{url_effective}", final).replace("%{http_code}", res.status) : "";
+      const body = head ? "" : await res.text();
+      if (out && out !== "/dev/null") { mkdirs(out.slice(0, out.lastIndexOf("/"))); fs.writeFile(out, body); }
+      const shown = out ? "" : body;
+      return shown + (write ? write.replace("%{url_effective}", final).replace("%{http_code}", res.status) : "");
+    } catch (e) {
+      log(`curl ${url}: ${e.name === "AbortError" ? "timed out" : e.message}`, "error");
+      return write ? write.replace("%{url_effective}", "").replace("%{http_code}", "000") : "";
+    } finally { clearTimeout(timer); }
+  }
+  async function runSystemCmd(cmd) {
+    if (engine && typeof engine.system_cmd === "function") {
+      try { const r = await engine.system_cmd(cmd); if (r !== undefined && r !== null) return String(r); }
+      catch (e) { log(`engine stand-in: system_cmd: ${e.message}`, "error"); return ""; }
+    }
+    const argv = words(cmd);
+    if (argv && argv[0] === "curl") return curl(argv);
+    log(`system_cmd (not run in the browser): ${cmd}`);
+    return "";
   }
 
   // ---------- sound ----------
@@ -565,9 +672,29 @@
     nbNotes.set(note, { o, g });
   }
 
+  // norns-web.json's theme as CSS: colors (custom properties without their --) everywhere, dark
+  // over them in dark mode; specific enough to win over the page's own light and dark values.
+  // build.mjs has the same function.
+  function themeCss(t) {
+    const decl = (o) => Object.entries(o || {})
+      .filter(([k, v]) => /^[a-z][a-z0-9-]*$/.test(k) && !/[;{}<>]/.test(String(v)))
+      .map(([k, v]) => `--${k}: ${v};`).join(" ");
+    let css = `:root:root:root { ${decl(t.colors)} }`;
+    if (t.dark) css += ` @media (prefers-color-scheme: dark) { :root:root:not([data-theme="light"]) { ${decl(t.dark)} } }` +
+      ` :root:root[data-theme="dark"] { ${decl(t.dark)} }`;
+    return css;
+  }
+
   // ---------- the script's own page text (norns-web.json): title, intro, links, footer ----------
   // icon and touch_icon are paths in the script (root: where its files are served)
   function showAbout(a, root) {
+    // the script's colors (build.mjs writes them into the page already, so nothing flashes)
+    if (a.theme && !$("#nw-theme")) {
+      const st = document.createElement("style");
+      st.id = "nw-theme";
+      st.textContent = themeCss(a.theme);
+      document.head.append(st);
+    }
     if (a.title) {
       $("#script-name").textContent = a.title;
       document.title = a.title;
@@ -895,7 +1022,14 @@
       await factory.mountFile(`/code/${name}/${path}`, src);
     await factory.mountFile("/norns/norns.lua", nornsLua);
     lua = await factory.createEngine();
+    fs = (await factory.getLuaModule()).module.FS;
+    window.NornsWeb.dev = !!dev;
+    window.NornsWeb.data = `/data/${name}/`; // norns.state.data, where the script keeps its files
     lua.global.set("js_bridge", {
+      system_cmd: (id, cmd) => {
+        runSystemCmd(String(cmd)).then((out) => lua.global.get("norns_web").system_cmd_done(id, out));
+      },
+      make_dir: (path) => mkdirs(String(path)),
       engine: engineCall,
       engine_name: () => {},
       log: (s) => log(String(s)),
@@ -904,6 +1038,12 @@
         (engine && engine.os_capture ? engine.os_capture(String(cmd)) : "") ||
         "",
       nb: (kind, note, v) => nbCall(String(kind), +note, +v),
+      // a poll's value: the stand-in's poll(name), a number, or nothing
+      poll: (name) => {
+        if (!engine || typeof engine.poll !== "function") return undefined;
+        try { const v = engine.poll(String(name)); return typeof v === "number" && Number.isFinite(v) ? v : undefined; }
+        catch (e) { log(`engine stand-in: poll ${name}: ${e.message}`, "error"); return undefined; }
+      },
       storage_get: (k) => store.get(String(k)),
       storage_set: (k, v) => store.set(String(k), String(v)),
     });
@@ -917,6 +1057,7 @@
     keyFn = nw("key");
     paramsJson = nw("params_json");
     paramDelta = nw("param_delta");
+    paramGet = nw("param_get");
     replFn = nw("repl");
     psetFn = nw("pset");
     if (dev) liveReload();

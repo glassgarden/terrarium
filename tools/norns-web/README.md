@@ -6,7 +6,8 @@ engine. How close the sound is depends on the stand-in: a sketch, or the real DS
 to WebAssembly.
 
 It knows nothing about any one script. Any script that sticks to `screen`, `params`, `clock`,
-`metro` and engine commands should run; midi, grid, arc, softcut, crow and poll are silent stubs.
+`metro` and engine commands should run; polls come from the engine stand-in; midi, grid, arc, softcut and
+crow are silent stubs.
 It started inside [terrarium](https://github.com/glassgarden/terrarium), which is still the most
 complete example (an engine stand-in on real mi-UGens, a plugin that uses this page as its face).
 
@@ -46,7 +47,9 @@ and a static build of the example (`.github/workflows/test.yml`).
 node tools/norns-web/serve.mjs [script dir, default .] [port, default 8800]
 ```
 
-Open http://localhost:8800/. The page reloads by itself when you save a script file (`.lua`,
+Open http://localhost:8800/. The server also proxies the web for the page (`/proxy?url=`, used by
+the built-in curl and by stand-ins through `NornsWeb.proxy`), so CORS doesn't get in the way while
+developing. The page reloads by itself when you save a script file (`.lua`,
 `.js`, `.json`) or norns-web's own, and keeps your params across the reload (press Start sound
 again: browsers only start audio on a click). Changes to `serve.mjs` or `manifest.mjs` need a
 restart.
@@ -89,7 +92,9 @@ An optional `norns-web.json` next to the script fills in the rest:
   "actions": [{ "label": "Shuffle", "icon": "shuffle", "param": "randomize", "title": "…" }],
   "controls": [{ "keys": "E1", "does": "…" }, { "keys": "hold K1 + K3", "does": "…" }],
   "gallery_intro": "…", "gallery": [{ "img": "doc/a.png", "title": "…", "text": "…", "alt": "…" }],
-  "install": ";install https://github.com/…", "links": [{ "label": "…", "url": "…" }], "footer": "…" }
+  "install": ";install https://github.com/…", "links": [{ "label": "…", "url": "…" }], "footer": "…",
+  "theme": { "colors": { "night": "#1d1b3a", "amber": "#f2c14e", "paper": "#f4ecd8" },
+             "dark": { "paper": "#17152b", "ink": "#ece4d3" } } }
 ```
 
 - `title`, `subtitle`, `about`: the heading and intro over the device. `icon` is the tab's icon and
@@ -105,6 +110,13 @@ An optional `norns-web.json` next to the script fills in the rest:
   package. Hidden in a plugin's face.
 - `more`, `install`, `links`: the About section (the install line has a copy button); `footer`:
   credits or license text.
+- `theme`: the page's colors, so a script's page needn't look like every other. `colors` sets the
+  page's CSS custom properties (named without their `--`, as in `index.html`'s `:root`: `paper`,
+  `surface`, `ink`, `muted`, `rule`, `accent`, `accent-soft` for the page; `night`, `night-2`,
+  `night-ink`, `night-muted`, `night-rule`, `amber`, `amber-hi`, `amber-lo` for the band around the
+  device), in light and dark mode; `dark` sets them again for dark mode. `build.mjs` writes them
+  into the page, so it doesn't flash norns-web's colors first. For the scene behind the device,
+  see `NornsWeb.sky` below.
 
 ## In a plugin (hosted)
 
@@ -155,8 +167,13 @@ with no Lua files and the script's `norns-web.json` as `about`). terrarium's plu
 When the script sets `engine.name = "X"`, the page loads `lib/Engine_X.js` from the script (norns
 ignores that file). It registers a factory that returns an object with one method per engine
 command, plus optional `start(ctx, out)` (called when the page's sound is switched on, with an
-`AudioContext` and an output node) and `os_capture(cmd)` (answers `util.os_capture`, for scripts
-that look for files on norns):
+`AudioContext` and an output node), `os_capture(cmd)` (answers `util.os_capture`, for scripts
+that look for files on norns), `poll(name)` (a number for the script's `poll.set(name, f)`, as
+the engine's `addPoll` would give; asked on each poll's own `time`) and `system_cmd(cmd)` (the
+output of a `norns.system_cmd`, a string or a promise of one, for the programs a script runs on
+norns, such as a player; `undefined` passes the command on). A stand-in that streams audio from
+the web wraps its URLs in `NornsWeb.proxy(url)`: through the dev server's proxy while developing,
+as they are in a static build (where only servers that allow CORS work):
 
 ```js
 NornsWeb.engines.X = () => ({
@@ -168,6 +185,23 @@ NornsWeb.engines.X = () => ({
 A stand-in that needs files of its own (an AudioWorklet module, WebAssembly) keeps them in a
 folder next to it, `lib/Engine_X/`; `build.mjs` copies it along. The stand-in finds it from its
 own URL: `document.currentScript.src.replace(/\.js$/, "/")`, read when the script loads.
+
+The stand-in can read the script's state: `NornsWeb.param(id)` is a param's value (a number, or
+`undefined`), and `NornsWeb.readFile(path)` a file the script wrote (a string, or `null`), such as
+a cache under `norns.state.data` (`NornsWeb.data`, `/data/<name>/`).
+
+Its file can also paint the scene behind the device, in place of the night sky and its ground, by
+setting `NornsWeb.sky`. Both skies (the page's and full screen's) use it, each a canvas of chunky
+pixels (4 CSS pixels each) with a `view` of its own:
+
+```js
+NornsWeb.sky = {
+  fps: 12, // frames a second (default 8; none with reduced motion)
+  layout(view) { /* view.cols, view.rows, view.ground (the row the device stands on),
+                   view.device ({ left, right, top, bottom }), view.still */ },
+  draw(g, t, view) { /* g: the canvas's 2D context, t: ms; clear and paint all of it */ },
+};
+```
 
 Without a stand-in, engine commands are only logged (tick "engine commands" under the log).
 
@@ -202,7 +236,11 @@ value (`params:get("x")`), a statement just runs. Up and down recall history.
 - **PARAMS:** PSETs live in the browser's storage (8 slots next to the panel, or `params:write(n)` /
   `params:read(n)` from the REPL), not in files; no MIDI mapping, no clock params.
 - **Audio:** only what the stand-in plays.
-- `norns.system_cmd` is logged, not run.
+- **`norns.system_cmd`** goes to the stand-in's `system_cmd(cmd)` first, then to a built-in
+  `curl` (on `fetch`: `-s -L -f -I -m -A -H -o -w '%{url_effective}'`, one URL, no pipes), and is
+  otherwise logged, not run. Its callback gets the output later, as on norns, and as on norns
+  the commands run one at a time, each after the one before it finishes. `util.make_dir`
+  works; files written by `curl -o` are there for Lua's `io.open`, until the page reloads.
 
 ## License
 

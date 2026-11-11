@@ -11,8 +11,8 @@
 -- metro, util, tab, include, norns,
 -- engine commands (sent to a JS stand-in, lib/Engine_<name>.js, if any), and one
 -- built-in nb voice ("web synth") for scripts that use nb.
--- midi out (when the host has ports: a plugin's); grid, arc, softcut, crow, poll and the rest
--- are silent stubs.
+-- midi out (when the host has ports: a plugin's), polls (answered by the stand-in's poll(name));
+-- grid, arc, softcut, crow and the rest are silent stubs.
 
 local W, H = 128, 64
 local js = js_bridge -- set by norns-web.js: engine(), log(), os_capture()
@@ -376,6 +376,11 @@ function norns_web.params_json()
   return "[" .. table.concat(out, ",") .. "]"
 end
 function norns_web.param_delta(i, d) P:delta(i, d) end
+-- a param's value by id, for the page's stand-ins and scenes (nil if there's no such param)
+function norns_web.param_get(id)
+  local ok, v = pcall(P.get, P, id)
+  if ok and type(v) == "number" then return v end
+end
 function norns_web.pset(action, n)
   local ok, err = pcall(action == "save" and P.write or P.read, P, n)
   if not ok then js.error(tostring(err)) end
@@ -476,7 +481,7 @@ function util.trim(s) return (tostring(s):gsub("^%s+", ""):gsub("%s+$", "")) end
 function util.acronym(s) return (tostring(s):gsub("(%w)%w*%s*", "%1")) end
 function util.file_exists(path) local f = io.open(path, "r"); if f then f:close(); return true end; return false end
 function util.os_capture(cmd) return js.os_capture(cmd) or "" end
-function util.make_dir() end
+function util.make_dir(path) if js.make_dir then js.make_dir(path) end end
 function util.scandir() return {} end
 function util.wrap(n, min, max) return (n - min) % (max - min + 1) + min end
 tab = {}
@@ -504,9 +509,31 @@ engine = setmetatable({}, {
 
 -- ---------- the rest of the system ----------
 _path = { code = "/code/", dust = "/dust/", data = "/data/", audio = "/audio/" }
+-- norns.system_cmd: run by the page (js.system_cmd: the stand-in's system_cmd, else a built-in
+-- curl on fetch, else logged); the output comes back later through norns_web.system_cmd_done,
+-- as norns' own runs in the background. Like norns' (lua/core/norns.lua), one at a time: a
+-- command waits for the ones before it to finish, so a slow one holds up the rest here too.
+-- Without the page's help it's logged and answers "".
+local cmd_queue, cmd_busy, next_cmd = {}, false, 0
+local function run_next_cmd()
+  local c = cmd_queue[1]
+  if not c then cmd_busy = false; return end
+  cmd_busy = true
+  next_cmd = next_cmd + 1
+  c.id = next_cmd
+  js.system_cmd(c.id, c.cmd)
+end
 norns = {
   state = {}, version = { update = "norns-web" },
-  system_cmd = function(cmd, cb) print("system_cmd (not run in the browser): " .. cmd); if cb then cb("") end end,
+  system_cmd = function(cmd, cb)
+    if js.system_cmd then
+      cmd_queue[#cmd_queue + 1] = { cmd = cmd, cb = cb }
+      if not cmd_busy then run_next_cmd() end
+    else
+      print("system_cmd (not run in the browser): " .. cmd)
+      if cb then cb("") end
+    end
+  end,
   enc = { sens = function() end, accel = function() end },
   none = function() end,
 }
@@ -538,8 +565,39 @@ local function midi_device(port)
   return d
 end
 function midi.connect(port) return midi_device(port or 1) end
-grid, arc, hid, crow, softcut, audio, poll, osc, keyboard, gamepad = stub("grid"), stub("arc"), stub("hid"),
-  stub("crow"), stub("softcut"), stub("audio"), stub("poll"), stub("osc"), stub("keyboard"), stub("gamepad")
+grid, arc, hid, crow, softcut, audio, osc, keyboard, gamepad = stub("grid"), stub("arc"), stub("hid"),
+  stub("crow"), stub("softcut"), stub("audio"), stub("osc"), stub("keyboard"), stub("gamepad")
+
+-- ---------- poll: values from the engine stand-in ----------
+-- As on norns: p = poll.set(name, callback); p.time = seconds; p:start(). Each running poll asks
+-- the stand-in's poll(name) on its own timer (js.poll); no answer (nil) skips the callback.
+local polls = {}
+poll = {}
+function poll.set(name, callback)
+  local p = { name = name, callback = callback, time = 0.25, running = false, last = 0 }
+  function p:start() self.running = true; self.last = now end
+  function p:stop() self.running = false end
+  function p:update()
+    local v = js.poll and js.poll(self.name)
+    if v ~= nil and self.callback then self.callback(v) end
+  end
+  polls[name] = p
+  return p
+end
+function poll.list_names()
+  local names = {}
+  for name in pairs(polls) do names[#names + 1] = name end
+  table.sort(names)
+  return names
+end
+local function run_polls()
+  for _, p in pairs(polls) do
+    if p.running and now - p.last >= p.time then
+      p.last = now
+      p:update()
+    end
+  end
+end
 _menu = { rebuild_params = function() end, redraw = function() end }
 wifi = stub("wifi")
 
@@ -578,6 +636,7 @@ function norns_web.tick(t)
   now = t
   if running then guarded(run_clocks) end
   guarded(run_metros)
+  guarded(run_polls)
   if dirty then
     dirty = false
     return frame_string()
@@ -601,6 +660,14 @@ function norns_web.repl(code)
   end
 end
 
+function norns_web.system_cmd_done(id, out)
+  local c = cmd_queue[1]
+  if not c or c.id ~= id then return end
+  table.remove(cmd_queue, 1)
+  -- (a command the callback runs queues behind the next one, as on norns)
+  if c.cb then guarded(c.cb, out or "") end
+  run_next_cmd()
+end
 function norns_web.enc(n, d) if enc then guarded(enc, n, d) end end
 function norns_web.key(n, z) if key then guarded(key, n, z) end end
 function norns_web.set_tempo(t) tempo = t end
