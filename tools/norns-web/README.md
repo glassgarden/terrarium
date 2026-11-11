@@ -94,6 +94,7 @@ An optional `norns-web.json` next to the script fills in the rest:
   "controls": [{ "keys": "E1", "does": "…" }, { "keys": "hold K1 + K3", "does": "…" }],
   "gallery_intro": "…", "gallery": [{ "img": "doc/a.png", "title": "…", "text": "…", "alt": "…" }],
   "install": ";install https://github.com/…", "links": [{ "label": "…", "url": "…" }], "footer": "…",
+  "analytics": "G-XXXXXXXXXX",
   "theme": { "colors": { "night": "#1d1b3a", "amber": "#f2c14e", "paper": "#f4ecd8" },
              "dark": { "paper": "#17152b", "ink": "#ece4d3" } } }
 ```
@@ -111,6 +112,8 @@ An optional `norns-web.json` next to the script fills in the rest:
   package. Hidden in a plugin's face.
 - `more`, `install`, `links`: the About section (the install line has a copy button); `footer`:
   credits or license text.
+- `analytics`: a Google Analytics measurement id (`G-…`). `build.mjs` puts its Google tag
+  (gtag.js) at the top of the page; the dev server and a plugin's face go without.
 - `theme`: the page's colors, so a script's page needn't look like every other. `colors` sets the
   page's CSS custom properties (named without their `--`, as in `index.html`'s `:root`: `paper`,
   `surface`, `ink`, `muted`, `rule`, `accent`, `accent-soft` for the page; `night`, `night-2`,

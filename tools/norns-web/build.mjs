@@ -52,6 +52,21 @@ if (m.about?.theme) {
     ` :root:root[data-theme="dark"] { ${decl(t.dark)} }`;
   page = page.replace("</head>", `<style id="nw-theme">${css}</style>\n</head>`);
 }
+// the script's Google Analytics tag (norns-web.json "analytics": a measurement id), only in a build:
+// not on the dev server, nor in a plugin's face
+const ga = m.about?.analytics;
+if (ga && /^G-[A-Z0-9]+$/.test(ga)) {
+  page = page.replace("<head>", `<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${ga}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', '${ga}');
+  </script>
+`);
+} else if (ga) console.warn(`norns-web: analytics "${ga}" isn't a Google Analytics measurement id (G-...), left out`);
 fs.writeFileSync(path.join(out, "index.html"), page);
 for (const f of [m.about?.icon, m.about?.touch_icon, ...(m.about?.gallery || []).map(g => g.img)].filter(Boolean)) {   // the page's icons and pictures (norns-web.json)
   fs.mkdirSync(path.dirname(path.join(out, "script", f)), { recursive: true });
