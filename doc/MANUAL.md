@@ -12,6 +12,34 @@ _generative music in a jar, for monome norns_
 
 ![terrarium: rain falling on a meadow, a pond, clouds and an aurora, inside the glass of a jar](img/hero.png)
 
+## Foreword
+
+When I started thinking about terrarium, the norns script, I was already inspired by so many
+scripts that take the nature as their inspiration like fall, flora, and other generative concepts
+that appear in the natural world.
+
+I'm also a huge fan of plants and terrariums are a perfect ecosystem where you take time to build,
+care and wait for it to balance. Frustration is part of the process since we make mistakes, plants
+perish and we learn from it.
+
+I took this terrarium concept and applied it to sound, creating a small ecosystem of generative music
+by leveraging the incredible work of Émilie Gillet and her Mutable Instruments modules.
+
+I'm not a big DSP expert, so relying on Gillet's work allowed me to focus on the aspects of transformation
+and interaction between all parts of the instrument.
+
+Finally, since not all have access to the fantastic Monome Norns instrument, I wanted to make terrarium
+as accessible as possible, so a Web version was made and at the end, a friend asked me for a plugin since
+he wanted to use it within his DAW.
+
+This is the little story of terrarium: a small world in a jar that makes music.
+
+![a terrarium](img/terrarium.png)
+
+Hope you enjoy it!\
+Carlos E.\
+Founder and creator of glassgarden<span style="color: #d9a441;">.</span> / Voltage Foundry Modular
+
 <!-- PHOTO: your norns on a table, running terrarium -->
 
 terrarium is a small world in a jar that makes music. Weather falls on a landscape, and wherever
@@ -56,6 +84,8 @@ To install terrarium, type this in the maiden REPL:
 ```
 ;install https://github.com/glassgarden/terrarium
 ```
+
+You can also enjoy terrarium in the browser at <https://terrarium.glassgarden.cc>
 
 ### The first time you open it
 

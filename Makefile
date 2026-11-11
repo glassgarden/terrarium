@@ -7,7 +7,7 @@ DEST  ?= /home/we/dust/code/terrarium
 MIUGENS ?= ../norns-mi-UGens
 
 .DEFAULT_GOAL := help
-.PHONY: help web norns-web stop test soak build clean deploy manual-images manual-pdf plugin-manual-pdf art mi-wasm logo norns-web-pull norns-web-push
+.PHONY: help web norns-web stop test soak build clean deploy manual-images manual-scene manual-pdf plugin-manual-pdf art mi-wasm logo norns-web-pull norns-web-push
 
 help: ## list the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{ printf "  make %-14s %s\n", $$1, $$2 }'
@@ -49,6 +49,10 @@ logo: ## draw the mark (doc/img/icon.svg, logo.svg, icon-touch.svg and their PNG
 	@[ -d tools/manual/node_modules ] || npm --prefix tools/manual install --no-fund --no-audit
 	node tools/manual/svg2png.mjs doc/img/icon-touch.svg doc/img/icon-touch.png 180
 	node tools/manual/svg2png.mjs doc/img/icon.svg doc/img/icon.png 128
+
+manual-scene: ## render the jar's scene for the manual's cover and chapter rules (doc/img/manual-*.png; node + a Chromium)
+	@[ -d tools/manual/node_modules ] || npm --prefix tools/manual install --no-fund --no-audit
+	node tools/manual/scene.mjs
 
 manual-pdf: ## build doc/terrarium-manual.pdf from doc/MANUAL.md (node + a Chromium)
 	@[ -d tools/manual/node_modules ] || npm --prefix tools/manual install --no-fund --no-audit
