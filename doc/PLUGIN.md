@@ -13,15 +13,15 @@ can be the plugin's UI; the sound has to be native.
 
 ## The pieces, and where each comes from
 
-| Part        | Today                                                  | In the plugin                                                                       |
-| ----------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| mi-UGens    | armhf for norns, wasm for the browser                  | native libraries from norns-mi-UGens (`./build.sh --lib`, `native/mi_ugens.hpp`)    |
-| SynthDefs   | `Engine_Terrarium.sc`, rebuilt in `Engine_Terrarium.js` | a C++ port of `Engine_Terrarium.js`: the mi-UGens plus a dozen plain blocks          |
-| Lua         | Lua 5.3 on norns; norns-web's `norns.lua` in a browser  | Lua 5.3 embedded, with `norns.lua`: terrarium's Lua runs unchanged                  |
-| clock       | the norns clock                                        | the host's tempo and position (rain on the DAW's grid)                              |
-| UI          | 128×64 OLED, E1–E3, K1–K3                              | norns-web's page in a `WebBrowserComponent`: frames in, encoders and keys out       |
-| params      | norns PARAMS, PSETs                                    | host automation (below); the state saved with the project                           |
-| visitors    | MIDI out over USB, the synth back through the input    | MIDI out to another track, that track back in through a sidechain input (below)     |
+| Part      | Today                                                   | In the plugin                                                                   |
+| --------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| mi-UGens  | armhf for norns, wasm for the browser                   | native libraries from mi-UGens (`./build.sh --lib`, `native/mi_ugens.hpp`)      |
+| SynthDefs | `Engine_Terrarium.sc`, rebuilt in `Engine_Terrarium.js` | a C++ port of `Engine_Terrarium.js`: the mi-UGens plus a dozen plain blocks     |
+| Lua       | Lua 5.3 on norns; norns-web's `norns.lua` in a browser  | Lua 5.3 embedded, with `norns.lua`: terrarium's Lua runs unchanged              |
+| clock     | the norns clock                                         | the host's tempo and position (rain on the DAW's grid)                          |
+| UI        | 128×64 OLED, E1–E3, K1–K3                               | norns-web's page in a `WebBrowserComponent`: frames in, encoders and keys out   |
+| params    | norns PARAMS, PSETs                                     | host automation (below); the state saved with the project                       |
+| visitors  | MIDI out over USB, the synth back through the input     | MIDI out to another track, that track back in through a sidechain input (below) |
 
 ## Visitors in a DAW
 
@@ -61,27 +61,27 @@ lands on the grid, not on the UI timer's jitter. Screen frames go to the UI afte
 
 ## Phases
 
-1. **mi-UGens native libraries** (norns-mi-UGens, branch `native-libs`): one shared library per
+1. **mi-UGens native libraries** (mi-UGens, branch `native-libs`): one shared library per
    UGen for Linux, macOS (universal) and Windows, the same C API as wasm, a header-only C++ loader
-   and a render test; CI builds and tests each platform and adds them to releases. *Done:
-   norns-mi-UGens v1.2.0; the same sound on all three platforms.*
+   and a render test; CI builds and tests each platform and adds them to releases. _Done:
+   mi-UGens v1.2.0; the same sound on all three platforms._
 2. **Plugin skeleton:** JUCE (VST3, AU, standalone), Lua + `norns.lua` embedded, the host clock,
    the native mi-UGens loaded from the bundle, MiPlaits only: rain on meadow, on the DAW's grid.
-   This proves the hard parts: Lua threading, tempo sync, the native engine. *In progress on the
+   This proves the hard parts: Lua threading, tempo sync, the native engine. _In progress on the
    `plugin` branch ([plugin/](../plugin/README.md)): the core (Lua, engine, timing, no JUCE) and
    `terrarium-render` work, notes land within a 64-sample block of the host's 16ths at any tempo,
-   start and block size; the VST3 and standalone build and pass pluginval (strictness 5).*
+   start and block size; the VST3 and standalone build and pass pluginval (strictness 5)._
 3. **The engine:** the rest of `Engine_Terrarium.js` in C++, every SynthDef; the sidechain input
-   and MIDI out for visitors. *The engine is done on the `plugin` branch: every SynthDef of the
+   and MIDI out for visitors. _The engine is done on the `plugin` branch: every SynthDef of the
    .sc (voices, pond, fog, clouds, fireflies, mountains, aurora, roots, the tape), module swaps
    built off the audio thread, tested by rendering every module and 57 swaps in 30 s (clean
    under AddressSanitizer). Visitors too: MIDI out to the DAW (port 1) or to any system MIDI
    output the plugin opens itself (a synth, loopMIDI, the IAC Driver), each note on its beat, and
-   the sound back through a "Visitors" side chain.*
+   the sound back through a "Visitors" side chain._
 4. **UI and automation:** norns-web's page as the editor, the drawer with map slots, state in the
-   project. *Pulled ahead of phase 3, on the `plugin` branch: the page is the face
+   project. _Pulled ahead of phase 3, on the `plugin` branch: the page is the face
    (norns-web's hosted mode), the ten macros and 8 map slots named after what they follow, both
-   ways, the map bindings saved with the project.*
+   ways, the map bindings saved with the project._
 
 Later: notarizing the macOS build. (The engine runs at 48 kHz at any host rate, with a resampler
 at the edges; the heaviest jar takes about 10% of a core.)

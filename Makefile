@@ -4,7 +4,7 @@ PORT  ?= 8800
 NORNS_WEB ?= https://github.com/carlosedp/norns-web
 NORNS ?= we@norns.local
 DEST  ?= /home/we/dust/code/terrarium
-MIUGENS ?= ../norns-mi-UGens
+MIUGENS ?= ../mi-UGens
 
 .DEFAULT_GOAL := help
 .PHONY: help web norns-web stop test soak build clean deploy manual-images manual-scene manual-pdf plugin-manual-pdf art mi-wasm logo norns-web-pull norns-web-push
@@ -66,8 +66,8 @@ art: ## render doc/art (README banner, social preview, wallpapers) from the scri
 	@[ -d tools/manual/node_modules ] || npm --prefix tools/manual install --no-fund --no-audit
 	node tools/manual/art.mjs
 
-# the browser's engine plays mi-UGens built as WebAssembly by norns-mi-UGens (podman or docker)
-mi-wasm: ## rebuild lib/Engine_Terrarium/ (the browser's mi-UGens) from norns-mi-UGens (MIUGENS=...)
+# the browser's engine plays mi-UGens built as WebAssembly by mi-UGens (podman or docker)
+mi-wasm: ## rebuild lib/Engine_Terrarium/ (the browser's mi-UGens) from mi-UGens (MIUGENS=...)
 	cd $(MIUGENS) && ./build.sh --wasm --pr 24
 	cp $(MIUGENS)/work/out-wasm/*.wasm $(MIUGENS)/work/out-wasm/mi-ugens.js \
 		$(MIUGENS)/work/out-wasm/mi-ugens-node.js $(MIUGENS)/work/out-wasm/BUILDINFO lib/Engine_Terrarium/

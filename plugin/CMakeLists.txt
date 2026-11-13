@@ -43,7 +43,7 @@ elseif(APPLE)
   target_compile_definitions(lua53 PRIVATE LUA_USE_MACOSX)
 endif()
 
-# ---------- the native mi-UGens, from norns-mi-UGens' release ----------
+# ---------- the native mi-UGens, from mi-UGens' release ----------
 set(MI_RELEASE v1.2.0)
 if(NOT MI_UGENS_DIR)
   if(WIN32)
@@ -57,7 +57,7 @@ if(NOT MI_UGENS_DIR)
     set(MI_HASH 2b466a2267b39b483a6bbd301127deb1a2dde28c167e5a0a34a31ca115d2dff5)
   endif()
   FetchContent_Declare(mi_ugens
-    URL https://github.com/glassgarden/norns-mi-UGens/releases/download/${MI_RELEASE}/mi-UGens-native-${MI_PLAT}-${MI_RELEASE}.tar.gz
+    URL https://github.com/glassgarden/mi-UGens/releases/download/${MI_RELEASE}/mi-UGens-native-${MI_PLAT}-${MI_RELEASE}.tar.gz
     URL_HASH SHA256=${MI_HASH})
   FetchContent_MakeAvailable(mi_ugens)
   set(MI_UGENS_DIR "${mi_ugens_SOURCE_DIR}")

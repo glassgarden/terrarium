@@ -19,7 +19,7 @@ juce/        the plugin (PluginProcessor, PluginEditor), the resources each bund
 
 The script isn't copied or ported: each bundle carries `terrarium.lua` and `lib/` as they are,
 norns-web's `norns.lua` as the norns API, Lua 5.3 (what norns runs), and the native mi-UGens from
-[norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens/blob/main/native/README.md)' release.
+[mi-UGens](https://github.com/glassgarden/mi-UGens/blob/main/native/README.md)' release.
 
 ## Build
 
@@ -103,6 +103,7 @@ transport running, saves and restores its state, and checks it made sound. CI al
   Reason and Live offer it as the instrument's side chain): route the synth's track, or an
   input with the hardware synth, into it. Each note opens it for a moment, and visitors' first
   macro lets some through between notes.
+
 - **The face's settings** (the shell, the screen's color, the drawer) are kept with the project, and
   its fonts come in the bundle (a DAW may be offline). The plugin's icon is the jar
   (`doc/img/icon-touch.svg`).

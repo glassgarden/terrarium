@@ -43,7 +43,7 @@ https://github.com/pichenettes/eurorack, inside the mi-UGens below.
 mi-UGens
 --------
 Volker Böhm's SuperCollider ports of the Mutable Instruments modules,
-https://github.com/v7b1/mi-UGens, built by https://github.com/glassgarden/norns-mi-UGens
+https://github.com/v7b1/mi-UGens, built by https://github.com/glassgarden/mi-UGens
 (mi-UGens/BUILDINFO in the plugin's resources records the exact source).
 Copyright Volker Böhm. GNU General Public License v3.0 (LICENSE.txt).
 

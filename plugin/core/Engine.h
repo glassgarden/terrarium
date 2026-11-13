@@ -1,5 +1,5 @@
 // The engine: Engine_Terrarium.sc for the plugin, as Engine_Terrarium.js is for the browser.
-// Each SynthDef is a Synth here, built from the native mi-UGens (norns-mi-UGens' native
+// Each SynthDef is a Synth here, built from the native mi-UGens (mi-UGens' native
 // libraries, through mi_ugens.hpp) and the plain UGens in Ugens.h, running in 64-sample
 // blocks as scsynth does. The .sc is the reference: same graphs, same lags, same routing.
 //
@@ -35,7 +35,7 @@ struct Note {
 };
 
 class Engine {
-public:
+  public:
     using Params = std::map<std::string, float>;
     class Synth;
     class Tape;
@@ -44,23 +44,23 @@ public:
     ~Engine();
 
     // the native mi-UGens in libDir (MiPlaits.so / .dylib / .dll ...); false, with err, if MiPlaits is missing
-    bool load(const std::string& libDir, std::string& err);
+    bool load(const std::string &libDir, std::string &err);
     void prepare(double sampleRate);
 
     // message thread: before a command is queued (attaches a new synth to a module swap)
-    void prepareCommand(Command& c);
+    void prepareCommand(Command &c);
     // message thread: frees what the audio thread is done with
     void emptyTrash();
     // message thread: a prepared command that won't be queued after all
-    void discard(Command& c);
+    void discard(Command &c);
 
     // audio thread
-    void command(const Command& c);
-    void render(float* left, float* right, const float* inL = nullptr, const float* inR = nullptr);  // one BLOCK
+    void command(const Command &c);
+    void render(float *left, float *right, const float *inL = nullptr, const float *inR = nullptr); // one BLOCK
 
-    SpscQueue<Note, 64> notes;  // for the message thread's log
+    SpscQueue<Note, 64> notes; // for the message thread's log
 
-private:
+  private:
     double sr_ = 48000;
     std::map<std::string, std::unique_ptr<mi::Library>> libs_;
 
@@ -68,11 +68,11 @@ private:
     // audio thread, one (the mirror) for the message thread, both moved by the same commands
     struct State {
         std::string voiceKind, colorKind, airKind, droneKind;
-        std::map<std::string, Params> voiceParams;  // per voice kind
+        std::map<std::string, Params> voiceParams; // per voice kind
         Params colorParams, airParams, droneParams, tape;
         bool tapeOn = false;
         // applies c; returns the slot whose kind changed ("voice", "color", ... or "tape"), or ""
-        std::string apply(const Command& c);
+        std::string apply(const Command &c);
     };
     State audio_, mirror_;
 
@@ -81,15 +81,15 @@ private:
     std::unique_ptr<Tape> tape_;
     std::vector<std::unique_ptr<Synth>> fading_;
     std::vector<std::unique_ptr<Tape>> fadingTapes_;
-    SpscQueue<void*, 64> trash_;      // finished synths, for the message thread to free
-    SpscQueue<void*, 64> trashTape_;  // finished tapes
+    SpscQueue<void *, 64> trash_;     // finished synths, for the message thread to free
+    SpscQueue<void *, 64> trashTape_; // finished tapes
 
     float voiceL_[BLOCK], voiceR_[BLOCK], colorL_[BLOCK], colorR_[BLOCK];
 
-    std::unique_ptr<Synth> build(const std::string& slot, const State& s);
-    void swap(std::unique_ptr<Synth>& slot, Synth* next, int bus);
-    void say(const std::string& s);
-    mi::Library* lib(const char* name);
+    std::unique_ptr<Synth> build(const std::string &slot, const State &s);
+    void swap(std::unique_ptr<Synth> &slot, Synth *next, int bus);
+    void say(const std::string &s);
+    mi::Library *lib(const char *name);
 };
 
-}  // namespace terrarium
+} // namespace terrarium
