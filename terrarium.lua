@@ -23,7 +23,7 @@ engine.name = "Terrarium"
 local H = include("lib/helpers")
 local cv = include("lib/canvas")
 local Brain = include("lib/brain")
-local installer = include("lib/installer")
+local needs = include("lib/needs") -- mi-UGens: installed and removed through norns-deps
 local glass = include("lib/glass")
 local Climate = include("lib/climate")
 local Day = include("lib/daylight")
@@ -168,6 +168,46 @@ local function touched(t) hud, hud_t, toast_t = t, t.k and HUD_SEC or HUD_PART_S
 local scramble, reset -- a new terrarium, the plain one (below)
 local function focus() focus_t = 2.5 end
 
+-- ---------- mi-UGens ----------
+-- Without them (or before SuperCollider has restarted to load them) terrarium waits: norns-deps'
+-- screen installs them and restarts, and after a K2 there this screen stays, K3 opens it again.
+
+local waiting = false -- no scene, no params: the screen below
+local waiting_lines = {}
+
+local function open_needs()
+  needs.install(function(ok)
+    if ok and needs.ok() and not needs.restart_pending() then -- nothing left to do: start for real
+      norns.script.load(norns.state.script)
+      return
+    end
+    waiting_lines = needs.ok() and { "mi-UGens installed", "restart norns to load them", "", "K3: restart" }
+      or { "terrarium needs mi-UGens", "", "K3: install" }
+  end)
+end
+
+local function draw_waiting()
+  screen.font_face(1)
+  screen.font_size(8)
+  screen.level(15)
+  screen.move(0, 8)
+  screen.text("TERRARIUM")
+  screen.level(10)
+  for i, line in ipairs(waiting_lines) do
+    screen.move(0, 18 + i * 9)
+    screen.text(line)
+  end
+end
+
+-- PARAMS > remove mi-UGens: only what terrarium installed (norns-deps' manifest has it); they stay
+-- loaded until SuperCollider restarts, and after that terrarium offers to install them again
+local function remove_mi()
+  if not needs.installed() then say("not installed by terrarium") return end
+  needs.remove(function(ok)
+    if ok then print("terrarium: mi-UGens removed (what terrarium installed)") end
+  end)
+end
+
 -- ---------- sound ----------
 
 local function db_amp(db) return db <= -59.5 and 0 or 10 ^ (db / 20) end
@@ -289,6 +329,10 @@ local function add_params()
   params:set_action("t_randomize", function() scramble() end)
   params:add_trigger("t_reset", "reset the jar")
   params:set_action("t_reset", function() reset() end)
+  if resumes() then -- on a norns: the browser and the plugin carry their own mi-UGens
+    params:add_trigger("t_remove_mi", "remove mi-UGens")
+    params:set_action("t_remove_mi", function() remove_mi() end)
+  end
   params:add_group("terrarium_levels", "levels", #LEVELS)
   for _, l in ipairs(LEVELS) do
     params:add_control(l[1], l[2], controlspec.new(-60, 6, "lin", 0, l[4], "dB", 0.01))
@@ -417,7 +461,7 @@ end
 
 -- PARAMS > reset the jar: every param back to how a first launch has it (the day too, and
 -- the levels). The triggers aren't values; the rest is whatever add_params left them at.
-local TRIGGERS = { t_randomize = true, t_reset = true }
+local TRIGGERS = { t_randomize = true, t_reset = true, t_remove_mi = true }
 local function snapshot()
   local list = {}
   for id, i in pairs(params.lookup) do
@@ -585,8 +629,8 @@ end
 function redraw()
   screen.clear()
   screen.aa(0)
-  if installer.active then
-    installer.draw()
+  if waiting then
+    draw_waiting()
     screen.update()
     return
   end
@@ -653,7 +697,7 @@ local function tick()
   cv.ox, cv.oy = d[1], d[2]
   toast_t = toast_t - dt
   hud_t = hud_t - dt
-  if not installer.active then
+  if not waiting then
     Climate.update(dt, params:get("t_drift"))
     local was = Day.phase
     Day.update(dt)
@@ -686,7 +730,7 @@ end
 -- ---------- controls ----------
 
 function enc(n, d)
-  if installer.active then return end
+  if waiting then return end
   touch_t = sc.t
   if k1 and n > 1 then -- holding K1: settings
     if n == 2 then set_cursor = H.clamp(set_cursor + d, 1, #SETTINGS)
@@ -721,8 +765,8 @@ function enc(n, d)
 end
 
 function key(n, z)
-  if installer.active then
-    installer.key(n, z)
+  if waiting then
+    if n == 3 and z == 1 then open_needs() end
     return
   end
   touch_t = sc.t
@@ -769,11 +813,10 @@ end
 -- ---------- lifecycle ----------
 
 function init()
-  installer.check()
   redraw_metro = metro.init(tick, 1 / FPS)
-  if not installer.ok then
-    installer.active = true
-    redraw_metro:start()
+  if not needs.ok() or needs.restart_pending() then
+    waiting = true
+    open_needs()
     return
   end
   add_params()
@@ -790,6 +833,6 @@ end
 function cleanup()
   if redraw_metro then redraw_metro:stop() end
   stop_notes()
-  -- (not from the installer's screen: no params then, and the jar saved before stays)
+  -- (not from the mi-UGens screen: no params then, and the jar saved before stays)
   if defaults and resumes() then params:write(norns.state.data .. LAST, "last") end
 end

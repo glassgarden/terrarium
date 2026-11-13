@@ -9,7 +9,27 @@ local M = { now = 0, screen_calls = 0, engine_calls = {}, sets = {}, metros = {}
 local ROOT = (arg and arg[0] or ""):match("^(.*)/test/[^/]+$") or "."
 function include(path) return dofile(ROOT .. "/" .. path .. ".lua") end
 M.ROOT = ROOT
-_path = { code = ROOT .. "/", dust = "/home/we/dust/" }
+-- data: a real folder (norns-deps keeps its manifest and markers there with io.open); the test removes it
+local data = os.tmpname()
+os.remove(data)
+_path = { code = ROOT .. "/", dust = "/home/we/dust/", data = data .. "/" }
+
+-- HOME too, with the mi-UGens build terrarium installs in its Extensions (its BUILDINFO; the class
+-- files are util.os_capture's find, below). M.buildinfo(text) swaps it, M.buildinfo(nil) takes it
+-- away: another set than ours (okyeron's, say)
+M.home = data .. "/home"
+local real_getenv = os.getenv
+os.getenv = function(k) if k == "HOME" then return M.home end return real_getenv(k) end
+M.BUILDINFO = M.home .. "/.local/share/SuperCollider/Extensions/mi-UGens/BUILDINFO"
+M.OUR_BUILD = "repo:       https://github.com/v7b1/mi-UGens\nprs:        24\nbuilt:      2026-10-22T16:38:29Z (cross armhf)\n"
+function M.buildinfo(text)
+  if text == nil then os.remove(M.BUILDINFO) return end
+  os.execute("mkdir -p '" .. M.BUILDINFO:match("^(.*)/") .. "'")
+  local f = assert(io.open(M.BUILDINFO, "w"))
+  f:write(text)
+  f:close()
+end
+M.buildinfo(M.OUR_BUILD)
 
 -- ---------- the time of day ----------
 -- always noon, so a run doesn't depend on when it happens (the day's "clock" follows it)
@@ -176,9 +196,13 @@ end
 -- ---------- util / norns ----------
 M.has_mi, M.has_beads = true, true
 util = {}
--- find in Extensions: every class the installer needs, or none, or all but Beads
+-- find in Extensions: every class terrarium needs, or none, or all but Beads. And for norns-deps:
+-- the machine is a norns, sclang has been up M.sclang_up seconds (nil: it isn't running)
 local MI = { "MiPlaits", "MiRings", "MiRipples", "MiClouds", "MiVerb", "MiBeads", "MiElements" }
 function util.os_capture(cmd)
+  if cmd:match("^uname %-m") then return "armv7l" end
+  if cmd:match("^pgrep %-x sclang") then return M.sclang_up and "42" or "" end
+  if cmd:match("^ps %-o etimes=") then return tostring(M.sclang_up or "") end
   if not cmd:match("^find ") or not M.has_mi then return "" end
   local out = {}
   for _, c in ipairs(MI) do
@@ -211,7 +235,15 @@ function midi.connect(port) return midi_dev end
 _menu = { rebuild_params = function() end }
 
 function util.file_exists(path) return M.files[path] ~= nil end
-norns = { state = { data = "/home/we/dust/data/terrarium/" }, system_cmd = function(cmd, cb) M.last_system_cmd = cmd; if cb then cb("installed: MiPlaits\nexit=0") end end }
+-- norns.menu, norns.script and _norns: what norns-deps uses to take the screen over, and to restart
+local noop = function() end
+norns = {
+  state = { data = "/home/we/dust/data/terrarium/", script = "/home/we/dust/code/terrarium/terrarium.lua" },
+  menu = { status = function() return false end, init = noop, set = noop,
+    get_enc = noop, get_key = noop, get_redraw = noop, get_refresh = noop },
+  script = { load = function(path) M.loaded_script = path end },
+}
+_norns = { reset = function() M.restarted = true end }
 
 -- run the frame metro and clocks for `sec` seconds of simulated time
 function M.run(sec)

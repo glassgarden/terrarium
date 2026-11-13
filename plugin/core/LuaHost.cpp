@@ -98,8 +98,8 @@ int LuaHost::l_error(lua_State* L) {
     return 0;
 }
 
-// util.os_capture: the installer looks for mi-UGens with find; they're inside the plugin,
-// so it finds every class it needs (lib/installer.lua's NEEDS)
+// util.os_capture: lib/needs.lua looks for mi-UGens with find; they're inside the plugin,
+// so it finds every class it needs (its NEEDS)
 int LuaHost::l_os_capture(lua_State* L) {
     const char* cmd = luaL_optstring(L, 1, "");
     bool find_sc = std::strncmp(cmd, "find ", 5) == 0 && std::strstr(cmd, ".sc");

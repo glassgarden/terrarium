@@ -17,7 +17,7 @@ README.md: keep its images and links absolute URLs (relative ones break there).
 `make` lists these too (`make test`, `make web`, `make build`, `make deploy`).
 
 ```
-lua test/smoke.lua                    # headless run against test/mock_norns.lua: all modules, gestures, settings, installer
+lua test/smoke.lua                    # headless run against test/mock_norns.lua: all modules, gestures, settings, mi-UGens screens
 lua test/soak.lua [hours]             # hours of jar time, for leaks and stuck states (make soak; ~1.5 min an hour)
 node tools/norns-web/serve.mjs        # the real script in a browser at http://localhost:8800/
 node tools/norns-web/build.mjs --cdn  # static copy in tools/norns-web/dist/, to publish
@@ -36,7 +36,7 @@ footer) comes from
 
 - **Never write mi-UGens class names in the .sc file.** Look them up with `\MiPlaits.asClass`.
   A missing class makes sclang fail to compile, which breaks SuperCollider for _every_ norns
-  script, not just this one. The Lua installer handles missing mi-UGens instead.
+  script, not just this one. lib/needs.lua (norns-deps) installs missing mi-UGens instead.
 - **Never pass `seed` to MiBeads.** Any input there counts as "patched" and stops density from
   generating grains.
 - **norns runs Lua 5.3.** No `<const>`/`<close>` or other 5.4+ features (the dev machine has Lua 5.5).
@@ -51,6 +51,11 @@ footer) comes from
   `screen.move`: the picture drifts a pixel now and then (against OLED burn-in) and text must
   follow it.
 - **K1 is hold-only.** A quick K1 tap opens the norns system menu.
+- **`lib/deps.lua` and `lib/deps/` are norns-deps, vendored** (MIT; `lib/deps/VENDORED`, the
+  same copy as pollen's): change them only to fix them, note it there and send it upstream.
+  `lib/needs.lua` loads them only when a screen opens: they probe the machine as they load. Its
+  `N.ok()` check must stay a `find ... Mi*.sc`: the browser (`Engine_Terrarium.js`), the plugin
+  (`LuaHost.cpp`) and `test/mock_norns.lua` answer exactly that.
 - `lib/scene/none.lua` is an empty module (no macros, silent, draws nothing); enc() skips
   macros a module doesn't have.
 - A module with a variant (an option param picked with hold K2 + E2) sets `variant` to that param's id.
@@ -72,7 +77,7 @@ footer) comes from
   `plugin/core/Engine.cpp` (the plugin's engine), or the plugin says "unknown engine command".
 - **A SynthDef change goes in `Engine_Terrarium.js` too** (its `DEFS`, one function per SynthDef):
   it plays the same mi-UGens, built as WebAssembly in `lib/Engine_Terrarium/` (don't edit those;
-  `make mi-wasm` rebuilds them from `~/projects/norns-mi-UGens`, `./build.sh --wasm`; `sky.js`
+  `make mi-wasm` rebuilds them from `~/projects/mi-UGens`, `./build.sh --wasm`; `sky.js`
   there is ours: the page's scene, the jar's parts behind the device, fed by `note()`). Scalar vs
   control rate matters as in the SynthDef: a literal is a scalar, a SynthDef argument a control.
   The one exception is `terrarium_voice_input` (visitors): the browser has no MIDI out or input
@@ -98,10 +103,10 @@ footer) comes from
 
 ## Related repo
 
-`~/projects/norns-mi-UGens` (github.com/glassgarden/norns-mi-UGens, published; v1.0.0 on 2026-10-19) builds
+`~/projects/mi-UGens` (github.com/glassgarden/mi-UGens, published; v1.0.0 on 2026-10-19) builds
 mi-UGens for norns: `./build.sh --pr 24` cross-compiles in a Debian Buster armhf container
 (upstream v7b1/mi-UGens + PR 24 = MiBeads), `./deploy.sh` installs over ssh. Its GitHub release
-asset `mi-UGens-norns.tar.gz` (fixed name, latest release) is what `lib/installer.lua` downloads;
+asset `mi-UGens-norns-<version>.tar.gz` (pinned with its sha256 and its BUILDINFO's `built:` time in `lib/needs.lua`: bump all three for a new build, in pollen's and fx_miUGens' `lib/needs.lua` too, which skip the time) is what terrarium downloads;
 the tarball carries `install.sh`, which moves older mi-UGens installs aside (duplicate classes
 break sclang). `./build.sh --wasm --pr 24` builds seven of them as WebAssembly for the browser
 (`wasm/`: a stand-in `SC_PlugIn.h` so the wrappers compile unchanged, `mi-ugens.js` runs them in

@@ -89,12 +89,15 @@ You can also enjoy terrarium in the browser at <https://terrarium.glassgarden.cc
 
 ### The first time you open it
 
-If the Mutable Instruments modules aren't on your norns yet, terrarium shows a short message
-instead of the landscape. Press **K3** to download and install them (it needs Wi-Fi), then go to
-**SYSTEM > RESTART** in the norns menu and open terrarium again. You only do this once. terrarium installs its own norns build of the mi-UGens, which includes
-Beads.
+If the Mutable Instruments modules aren't on your norns yet, terrarium shows a short list
+instead of the landscape. Press **K3** to download and install them (it needs Wi-Fi). When it's
+done, press **K3** again: norns restarts, and terrarium opens with them. You only do this once.
+terrarium installs its own norns build of the mi-UGens, which includes Beads.
 
-<!-- PHOTO or screenshot: the installer screen ("terrarium needs mi-UGens") -->
+If you'd rather not now, press **K2**. terrarium waits on a "terrarium needs mi-UGens" screen,
+and **K3** there opens the install again.
+
+<!-- PHOTO or screenshot: the install screen ("TERRARIUM  install 1 item") -->
 
 ---
 
@@ -513,6 +516,10 @@ next time you open terrarium it's just as you left it. To start again from the p
 **PARAMS > reset the jar**. (Pulling the power skips this: the jar comes back as you last left
 it properly.)
 
+Removing terrarium? Go to **PARAMS > remove mi-UGens** first, then delete the script: it takes
+away the mi-UGens terrarium installed (never a set that was there before), and norns restarts to
+let go of them. Other scripts that play mi-UGens need them too, so leave them if you have those.
+
 To keep more than one, norns keeps presets for you. In the norns menu (a quick tap of K1), go to **PARAMS**, and
 **PSET** is at the top: _save_, _load_, _delete_. A preset remembers everything: which modules
 live in each part, their varieties, every knob, the settings, and even whether the air is frozen
@@ -551,10 +558,14 @@ hushed.
 
 ## If something seems wrong
 
-**It shows "terrarium needs mi-UGens".** The sound modules aren't installed yet, or an older set
-without some of them is (Beads and Elements came later). Press K3 (with
-Wi-Fi), then **SYSTEM > RESTART**. If you copied a `mi-UGens-norns*.tar.gz` into `dust/` yourself,
-press K2 instead.
+**It shows "terrarium needs mi-UGens".** The sound modules aren't installed yet, or another set
+is: an older one without some of them (Beads and Elements came later), or one from elsewhere
+(okyeron's, say) without the fixes terrarium's build has. Press K3 (with Wi-Fi) to install them;
+the older set is moved aside to a `mi-UGens-backup` folder. If the install fails, its screen shows
+the last lines of what went wrong, and K3 tries again.
+
+**It shows "mi-UGens installed, restart norns to load them".** They're in, but norns hasn't
+restarted since. Press K3, or use **SYSTEM > RESTART**.
 
 **Visitors: no notes go out.** Hold K2 and turn E2 on the visitors to pick the MIDI device, and
 check the channel in **PARAMS**. A device connected after opening terrarium shows up the next

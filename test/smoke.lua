@@ -400,30 +400,117 @@ assert(M.files[LAST] == saved, "norns-web: a jar was saved")
 norns.version = nil
 check("the last jar, back at launch")
 
--- an older mi-UGens install without Beads: the installer, like none at all
-M.relaunch()
-M.has_beads = false
-dofile(M.ROOT .. "/terrarium.lua")
-init()
-key(3, 1); key(3, 0)
-assert(M.last_system_cmd and M.last_system_cmd:match("install.sh"), "no installer for a build without Beads")
-M.run(0.3)
-check("older mi-UGens (no Beads): installer")
-M.has_beads = true
-M.last_system_cmd = nil
+-- mi-UGens, through norns-deps (lib/needs.lua). Its screens take the keys over (key is the
+-- global they swap) and K2 gives them back. A K2 press goes only down: its release would reach
+-- the script's own key().
+local needs = include("lib/needs")
 
--- the installer path when mi-UGens are missing
-local loaded = M
-loaded.has_mi = false
+-- PARAMS > remove mi-UGens: with nothing terrarium installed, no screen; with its manifest, the
+-- remove screen, and K2 there removes nothing
+M.relaunch()
 dofile(M.ROOT .. "/terrarium.lua")
 init()
-key(3, 1); key(3, 0)
-assert(loaded.last_system_cmd and loaded.last_system_cmd:match("install.sh"), "installer did not run install.sh")
+local own = key
+params:set("t_remove_mi", 1)
+assert(key == own, "remove opened a screen with nothing terrarium installed")
+local deps = needs.deps()
+deps:manifest():record("mi-UGens", { label = "mi-UGens", steps = { { cmd = "true" } } })
+params:set("t_remove_mi", 1)
+assert(key ~= own, "the remove screen didn't take the keys")
 M.run(0.5)
+key(2, 1)
+assert(key == own, "K2 on the remove screen didn't give the keys back")
+assert(needs.installed(), "K2 on the remove screen removed something")
+deps:manifest():forget("mi-UGens")
+assert(not needs.installed(), "the manifest stayed with nothing in it")
+cleanup()
+check("PARAMS > remove mi-UGens")
+
+-- no mi-UGens: the install screen instead of the scene. It downloads the pinned release, checked
+-- against its sha256, and runs the install.sh inside; K2 is "not now", and then terrarium's own
+-- screen opens it again with K3. No params on it, so the jar saved before stays as it was.
+M.relaunch()
+M.has_mi = false
+dofile(M.ROOT .. "/terrarium.lua")
+own = key
+init()
+assert(key ~= own, "no install screen without mi-UGens")
+local s = needs.deps():session({ "mi-UGens" })
+assert(s.state == "review" and #s.queue == 2, "the install should be two steps, waiting for K3")
+local get, put = s.queue[1].step.run, s.queue[2].step.run
+assert(get:match("/releases/download/v[%d.]+/mi%-UGens%-norns%-v[%d.]+%.tar%.gz") and get:match("sha256sum"),
+  "the download isn't a pinned, checked release: " .. get)
+assert(put:match("install%.sh"), "the install doesn't run the tarball's install.sh: " .. put)
+M.run(0.5)
+key(2, 1)
+assert(key == own, "K2 on the install screen didn't give the keys back")
+M.run(0.3)
+key(3, 1)
+assert(key ~= own, "K3 on terrarium's screen didn't open the install screen again")
+key(2, 1)
 local kept = M.files[LAST]
-cleanup() -- no params on the installer's screen: the jar saved before stays as it was
-assert(kept and M.files[LAST] == kept, "the installer's cleanup touched the saved jar")
-check("installer path (no mi-UGens)")
+cleanup()
+assert(kept and M.files[LAST] == kept, "cleanup on the mi-UGens screen touched the saved jar")
+check("no mi-UGens: install screen")
+
+-- an older mi-UGens install without Beads: the same screen (installing replaces it)
+M.relaunch()
+M.has_mi, M.has_beads = true, false
+dofile(M.ROOT .. "/terrarium.lua")
+own = key
+init()
+assert(key ~= own, "no install screen for a build without Beads")
+key(2, 1)
+cleanup()
+M.has_beads = true
+check("older mi-UGens (no Beads): install screen")
+
+-- every class there, but not the build terrarium installs: okyeron's set (no BUILDINFO), or an older
+-- build of ours. The same screen, which says it replaces them (install.sh moves them aside)
+for _, info in ipairs({ false, (M.OUR_BUILD:gsub("2026%-10%-22", "2026-10-01")), (M.OUR_BUILD:gsub("24", "")) }) do
+  M.buildinfo(info or nil)
+  M.relaunch()
+  dofile(M.ROOT .. "/terrarium.lua")
+  own = key
+  init()
+  assert(key ~= own, "no install screen over another mi-UGens set: " .. tostring(info))
+  local item = needs.deps():session({ "mi-UGens" }).items[1]
+  assert(item and item.spec.why:match("replaces"), "the install screen doesn't say it replaces the set there")
+  key(2, 1)
+  cleanup()
+end
+M.buildinfo(M.OUR_BUILD)
+check("another mi-UGens set (okyeron's, older): replaced")
+
+-- installed, but SuperCollider started before that: the restart screen, and K3 restarts
+local marker = needs.DIR .. "/restart_needed"
+os.execute("mkdir -p '" .. needs.DIR .. "'")
+local f = assert(io.open(marker, "w"))
+f:write(tostring(os.time() - 100))
+f:close()
+M.relaunch()
+M.sclang_up = 1000
+dofile(M.ROOT .. "/terrarium.lua")
+own = key
+init()
+assert(key ~= own, "no restart screen with the mi-UGens installed but not loaded")
+M.run(0.3)
+key(3, 1)
+assert(M.restarted, "K3 on the restart screen didn't restart norns")
+cleanup()
+-- after the restart: the marker is stale, it goes, and terrarium plays
+M.relaunch()
+M.sclang_up = 5
+dofile(M.ROOT .. "/terrarium.lua")
+init()
+f = io.open(marker, "r")
+assert(not f, "a stale restart marker stayed")
+assert(params:lookup_param("t_remove_mi"), "terrarium didn't start after the restart")
+M.run(0.5)
+cleanup()
+M.sclang_up = nil
+check("restart pending, then restarted")
+os.execute("rm -rf '" .. _path.data .. "'")
 
 print(("\nframes: %d, screen calls per frame: avg %.0f, max %d"):format(
   M.frames, M.total_calls / M.frames, M.max_calls))

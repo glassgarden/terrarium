@@ -34,10 +34,11 @@ at dawn and dusk when the day is on, a note at a time.
 ## Requirements
 
 - norns (or norns shield / fates)
-- [mi-UGens](https://github.com/glassgarden/norns-mi-UGens) built for norns. If they're missing,
-  terrarium shows an installer instead of the scene: **K3** downloads and installs the latest
-  build, **K2** installs a `mi-UGens-norns*.tar.gz` you copied into `dust/`. Restart norns after.
-  Fireflies needs a build that includes MiBeads; without it, that module is hidden.
+- [mi-UGens](https://github.com/glassgarden/mi-UGens) built for norns. If they're missing
+  (or an older set without Beads or Elements is there), terrarium shows an install screen instead
+  of the scene: **K3** downloads and installs them, then **K3** again restarts norns to load them.
+  **PARAMS > remove mi-UGens** takes away what terrarium installed. Both go through
+  [norns-deps](https://github.com/vehka/norns-deps).
 
 ## Install
 
@@ -99,8 +100,8 @@ hardware: see [doc/DEVELOPMENT.md](https://github.com/glassgarden/terrarium/blob
 The device under the night sky, for a desktop (3840 × 2160) or a phone (1179 × 2556), in the
 aluminium case or the black one.
 
-| Scene                                                                                                                                                                                                                               | Desktop                                                                                                                                                                                                                                   | Phone                                                                                                                                                                                                                                 |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scene                                                                                                                                                                                                                                 | Desktop                                                                                                                                                                                                                                       | Phone                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg" alt="Rain on a meadow and a pond, clouds, an aurora" width="320"><br>Rain on a meadow and a pond, clouds, an aurora | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-desktop-black.jpg)       | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/meadow-phone-black.jpg)       |
 | <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg" alt="Snow settling on crystals, mountains behind" width="320"><br>Snow settling on crystals, mountains behind         | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-desktop-black.jpg)           | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/snow-phone-black.jpg)           |
 | <img src="https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg" alt="Reeds over a pond, fireflies in the dark" width="320"><br>Reeds over a pond, fireflies in the dark          | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-desktop-black.jpg) | [aluminium](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-phone-alu.jpg) · [black](https://raw.githubusercontent.com/glassgarden/terrarium/main/doc/art/wallpapers/fireflies-phone-black.jpg) |
@@ -117,9 +118,11 @@ terrarium is made by [glassgarden](https://glassgarden.cc). © 2026 glassgarden.
   [Mutable Instruments code](https://github.com/pichenettes/eurorack), via Volker Böhm's
   [mi-UGens](https://github.com/v7b1/mi-UGens) (GPL-3.0), installed separately on the norns. The
   browser version carries WebAssembly builds of seven of them in `lib/Engine_Terrarium/`, built
-  from [norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`BUILDINFO` there records
+  from [mi-UGens](https://github.com/glassgarden/mi-UGens) (`BUILDINFO` there records
   the source).
-  [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`. The plugin's
+  [wasmoon](https://github.com/ceifa/wasmoon) (MIT) is vendored in `tools/norns-web`, and
+  [norns-deps](https://github.com/vehka/norns-deps) (MIT, by vehka) in `lib/deps.lua` and
+  `lib/deps/`; it installs and removes the mi-UGens. The plugin's
   downloads carry [THIRD-PARTY-NOTICES.txt](https://github.com/glassgarden/terrarium/blob/main/THIRD-PARTY-NOTICES.txt), with the licences of all it
   includes.
 - Mutable Instruments, monome, norns and all other product names are trademarks of their

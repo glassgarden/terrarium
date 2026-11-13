@@ -14,7 +14,7 @@ lib/canvas.lua           128x64 framebuffer, blitted to the screen as merged run
 lib/glass.lua            the glass over the scene: rim, condensation, frost
 lib/climate.lua          chaotic attractors that modulate the macros
 lib/scene/*.lua          one file per module: its drawing, macros and sound mapping
-lib/installer.lua        mi-UGens check and installer
+lib/needs.lua            mi-UGens: the check, the install and remove screens (lib/deps/: norns-deps, vendored)
 doc/SOUND.md             macro -> mi-UGen parameter map (the tuning reference)
 lib/Engine_Terrarium.js  the engine for norns-web: the same graphs, in Web Audio (norns ignores it)
 lib/Engine_Terrarium/    the mi-UGens it plays, built as WebAssembly (`make mi-wasm`); and sky.js, the page's scene
@@ -47,7 +47,7 @@ lua test/smoke.lua
 ```
 
 It loads the script against `test/mock_norns.lua`, plays every module, gesture and setting,
-exercises the installer path, and prints screen calls per frame. It checks the Lua logic only:
+exercises the mi-UGens screens (install, restart, remove), and prints screen calls per frame. It checks the Lua logic only:
 no sound, no real screen.
 
 `lua test/soak.lua [hours]` (`make soak`) runs the jar for hours of jar time (8 by default, about
@@ -67,7 +67,7 @@ node tools/norns-web/serve.mjs     # then open http://localhost:8800/
 
 It runs this Lua as is (screen, controls, clocks, PARAMS). The engine is `lib/Engine_Terrarium.js`:
 each SynthDef rebuilt in Web Audio around the same mi-UGens, compiled to WebAssembly by
-[norns-mi-UGens](https://github.com/glassgarden/norns-mi-UGens) (`./build.sh --wasm`) and kept in
+[mi-UGens](https://github.com/glassgarden/mi-UGens) (`./build.sh --wasm`) and kept in
 `lib/Engine_Terrarium/` (`make mi-wasm` rebuilds them). Every push to main publishes it to
 <https://terrarium.glassgarden.cc/> (`.github/workflows/pages.yml`).
 

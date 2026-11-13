@@ -1,0 +1,4 @@
+norns-deps, vendored from https://github.com/vehka/norns-deps at 6dbc4a6 (MIT, see LICENSE here).
+Copy it again from there to update; terrarium's own code is lib/needs.lua.
+One change here, to send upstream: ui.lua's wrap() no longer assigns to its loop variable
+(an error in Lua 5.4+, which desktop norns and norns-web run). pollen vendors the same copy.

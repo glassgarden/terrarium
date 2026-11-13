@@ -102,6 +102,7 @@ for _, k in ipairs(names) do print(("  %-18s %d"):format(k, most[k])) end
 if most["clock coroutines"] > 60 then fail("clock coroutines piled up: " .. most["clock coroutines"]) end
 if most["snow flakes"] > 40 then fail("snow flakes piled up: " .. most["snow flakes"]) end
 
+os.execute("rm -rf '" .. _path.data .. "'") -- the mock's data folder and HOME
 if next(failures) then
   print("\nsoak FAILED")
   os.exit(1)

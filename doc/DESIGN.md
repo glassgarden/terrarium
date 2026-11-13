@@ -93,9 +93,36 @@ E1 picks a part, and the others dim for a moment so it's clear which one you're 
   every note on a key change.)
 - **Rain follows the norns clock** so terrarium can play with other scripts and gear; each drop is
   spawned one step ahead so it visibly lands on its note.
-- **mi-UGens are installed by the script, not bundled.** The script checks for them and offers an
-  installer (from the norns-mi-UGens releases) instead of failing, and the engine never names
+- **mi-UGens are installed by the script, not bundled.** The script checks for them and offers to
+  install them (from the mi-UGens releases) instead of failing, and the engine never names
   mi-UGens classes directly, so a missing install can't break SuperCollider for other scripts.
+- **Installing and removing go through norns-deps (November 2026).**
+  [norns-deps](https://github.com/vehka/norns-deps) (MIT) is vendored in `lib/deps.lua` and
+  `lib/deps/` (`lib/deps/VENDORED` says from which commit), the same copy pollen uses;
+  `lib/needs.lua` is terrarium's side. Our own installer did the download and nothing else: it
+  ended on "SYSTEM > RESTART, then run terrarium again", had no way back, and a launch before
+  that restart got past the check (the files are there) with SuperCollider still missing the
+  classes. norns-deps brings:
+  - **A pinned, checked download.** A versioned release asset and its sha256, not `latest`,
+    resumed if it's cut off; a terrarium release moves to a new mi-UGens build on purpose.
+  - **Restart.** It notes when it installed; until SuperCollider has started since, terrarium
+    opens its restart screen (K3 restarts, or offers a reboot when JACK's files are gone)
+    instead of the scene. A stale note is deleted, so later launches don't load norns-deps.
+  - **Remove.** PARAMS > remove mi-UGens takes away `Extensions/mi-UGens`, only when its
+    manifest (`data/terrarium/deps/`) says terrarium put it there.
+  - **The tarball's install.sh still installs.** norns-deps' own UGen step leaves out any class
+    SuperCollider already finds elsewhere, which would mix an old Plaits with a new Beads.
+    terrarium needs the whole set, so an older or partial install gets the install screen, and
+    install.sh replaces it. Not only a partial one: the check also wants our build's
+    `Extensions/mi-UGens/BUILDINFO` (Beads' PR 24 in it, built no earlier than the pinned
+    build), which no other set has, so okyeron's (no Beads, missing later fixes), schollz's bundle,
+    v7b1's own or an older build of ours is replaced even with every class there (moving it to `~/mi-UGens-backup-*`, which remove leaves alone). The
+    step is a plain download plus a command, so the manifest carries its own removal.
+  - **The recipe is for `armv7l` only** (the build is armhf); anywhere else the screen says
+    where to get them. The offline install (a tarball copied into dust/) went: nobody used it.
+  - **norns-deps is loaded only when a screen opens** (it asks the machine about itself as it
+    loads). The browser and the plugin carry their own mi-UGens and answer the check's `find`
+    with every class, so they never load it.
 - **The visual details all carry information (October 2026).** Glass, condensation, water,
   the lightning flash, frost and shared wind were tried in a lab copy of the prototype with
   toggles, then all kept. Each one shows something (rain rate, which color module, the filter,
@@ -182,7 +209,7 @@ E1 picks a part, and the others dim for a moment so it's clear which one you're 
   scripts can use it. The prototype's "scene details" toggles were dropped: the details stay on.
 - **The browser plays the real mi-UGens (October 2026).** The browser engine was a Web Audio
   sketch (FM pairs, biquads, a convolver): fine for checking the routing, useless for judging a
-  sound or tuning a map. norns-mi-UGens now builds mi-UGens as WebAssembly: the SuperCollider
+  sound or tuning a map. mi-UGens now builds mi-UGens as WebAssembly: the SuperCollider
   wrappers compile unchanged against a small stand-in for SC's plugin header, and run in an
   AudioWorklet the way scsynth runs them (64-sample blocks, input rates, `t_trig`, `.lag`).
   `lib/Engine_Terrarium.js` rebuilds each SynthDef from those nodes, so the browser and the norns
@@ -253,7 +280,7 @@ E1 picks a part, and the others dim for a moment so it's clear which one you're 
   swapped, varieties picked, knobs set, the hum hushed), and losing it to SLEEP or another
   script was a real cost: few players save PSETs by habit. `cleanup()` writes every param to
   `last.pset` in the script's data folder, apart from the numbered PSETs so it takes no slot,
-  and `init()` reads it back silently before its one bang. A launch on the installer's screen
+  and `init()` reads it back silently before its one bang. A launch on the mi-UGens screen
   has no params, so its cleanup leaves the saved jar alone. Not saved every few minutes: a
   power cut loses what changed since the last clean exit, which isn't worth the SD card's
   writes. Only on a norns: the plugin's DAW and the browser keep their own state. PARAMS >
